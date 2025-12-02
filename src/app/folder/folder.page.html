@@ -1,0 +1,28 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    @if(folder === 'emprestimos'){
+      <ion-title>Empréstimos</ion-title>
+    }
+  </ion-toolbar>
+</ion-header>
+
+@if(folder === 'emprestimos'){
+  <ion-content>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="12" size-md="6">
+        <app-card [firstName]="'Eduardo Brasileiro'" [observation]="'Disse que só vai poder pagar dia 15'" [atrased]="true"></app-card>
+        <app-card [firstName]="'Humberto Constantino'" [atrased]="false"></app-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</ion-content>
+}
+@if(folder === 'novo-emprestimo'){
+  <ion-content>
+      <app-new-emprestimo></app-new-emprestimo>
+  </ion-content>
+}

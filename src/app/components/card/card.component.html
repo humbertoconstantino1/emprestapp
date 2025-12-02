@@ -1,0 +1,16 @@
+<ion-card>
+  <ion-card-header>
+    <ion-card-title>{{firstName()}}</ion-card-title>
+    @if(atrased() === true){
+      <ion-card-subtitle color="danger">Atrasado</ion-card-subtitle>
+    }@else{
+      <ion-card-subtitle color="success">Em dias</ion-card-subtitle>
+    }
+  </ion-card-header>
+  <ion-card-content>
+    {{observation()}}
+  </ion-card-content>
+  
+  <ion-button fill="clear">Atualizar</ion-button>
+  <ion-button fill="clear">Finalizar empréstimo</ion-button>
+</ion-card>

@@ -1,0 +1,7 @@
+{
+  "name": "emprestar",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

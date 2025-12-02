@@ -1,0 +1,64 @@
+  <form [formGroup]="clientForm" (ngSubmit)="submitForm()">
+
+    <!-- Nome -->
+    <ion-item>
+      <ion-label position="floating">Nome</ion-label>
+      <ion-input formControlName="nome" type="text"></ion-input>
+    </ion-item>
+
+    <!-- Telefone -->
+    <ion-item>
+      <ion-label position="floating">Telefone</ion-label>
+      <ion-input formControlName="telefone" type="tel"></ion-input>
+    </ion-item>
+
+    <!-- Valor do Empréstimo -->
+    <ion-item>
+      <ion-label position="floating">Valor do Empréstimo</ion-label>
+      <ion-input formControlName="valor" type="number"></ion-input>
+    </ion-item>
+
+    <!-- Juros -->
+    <ion-item>
+      <ion-label>Juros</ion-label>
+      <ion-select placeholder="Selecione" formControlName="juros">
+        <ion-select-option value="10">10%</ion-select-option>
+        <ion-select-option value="20">20%</ion-select-option>
+        <ion-select-option value="30">30%</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+    <!-- Endereço -->
+    <ion-item>
+      <ion-label position="floating">Endereço</ion-label>
+      <ion-input formControlName="endereco" type="text"></ion-input>
+    </ion-item>
+
+    <!-- Observações -->
+    <ion-item>
+      <ion-label position="floating">Observações</ion-label>
+      <ion-textarea formControlName="observacoes"></ion-textarea>
+    </ion-item>
+
+    <ion-item lines="none">
+  <!-- Label acima do botão -->
+  <ion-label>Data de vencimento</ion-label>
+
+  <!-- Botão do datetime -->
+  <ion-datetime-button datetime="datetime"></ion-datetime-button>
+
+  <!-- Modal que será aberto ao clicar -->
+  <ion-modal [keepContentsMounted]="true">
+      <ion-datetime formControlName="data" id="datetime" presentation="date"></ion-datetime>
+  </ion-modal>
+</ion-item>
+
+
+    <!-- Botão Enviar -->
+    <ion-button expand="block" type="submit" [disabled]="clientForm.invalid">
+      Registrar Empréstimo
+    </ion-button>
+
+   
+
+  </form>
