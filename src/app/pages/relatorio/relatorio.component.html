@@ -1,0 +1,28 @@
+<div style="max-width: 700px; margin: auto; text-align: center">
+  <!-- Widget À Receber -->
+  <h4>À Receber no mês atual</h4>
+  <apx-chart
+    [series]="gaugeOptions.series"
+    [chart]="gaugeOptions.chart"
+    [plotOptions]="gaugeOptions.plotOptions"
+    [labels]="gaugeOptions.labels"
+    [fill]="gaugeOptions.fill"
+    [dataLabels]="gaugeOptions.dataLabels"
+  >
+  </apx-chart>
+  <ion-item-divider> </ion-item-divider>
+
+  <!-- Gráfico de Colunas -->
+  <div style="margin-top: 40px">
+    <apx-chart
+      [series]="columnSeries"
+      [chart]="columnChartOptions"
+      [xaxis]="columnXAxis"
+      [yaxis]="columnYAxis"
+      [title]="columnTitle"
+      [dataLabels]="columnDataLabels"
+      [fill]="columnFill"
+    >
+    </apx-chart>
+  </div>
+</div>
