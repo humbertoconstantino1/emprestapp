@@ -56,8 +56,6 @@ import {
     IonItem,
     IonInput,
     IonTextarea,
-    IonDatetime,
-    IonDatetimeButton,
   ],
 })
 export class CardComponent implements OnInit {
