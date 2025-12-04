@@ -1,0 +1,135 @@
+.relatorio-container {
+  padding: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.chart-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  overflow: visible;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ion-icon {
+    font-size: 24px;
+    color: #ffffff;
+  }
+
+  &.receber {
+    background: linear-gradient(135deg, #00c853 0%, #69f0ae 100%);
+  }
+
+  &.receita {
+    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
+  }
+}
+
+.card-title {
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 2px;
+  }
+
+  span {
+    font-size: 13px;
+    color: #6c757d;
+  }
+}
+
+.gauge-wrapper {
+  display: flex;
+  justify-content: center;
+  overflow: visible;
+  padding: 10px 0;
+}
+
+.gauge-info {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 16px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.info-item {
+  text-align: center;
+
+  .label {
+    display: block;
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 4px;
+  }
+
+  .value {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a2e;
+
+    &.success {
+      color: #00c853;
+    }
+
+    &.warning {
+      color: #ff9800;
+    }
+  }
+}
+
+.area-chart-wrapper {
+  margin: 0 -10px;
+}
+
+// Dark mode
+@media (prefers-color-scheme: dark) {
+  .chart-card {
+    background: #1e1e2e;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .card-title {
+    h3 {
+      color: #ffffff;
+    }
+
+    span {
+      color: rgba(255, 255, 255, 0.6);
+    }
+  }
+
+  .gauge-info {
+    border-top-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .info-item {
+    .label {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .value {
+      color: #ffffff;
+    }
+  }
+}
+

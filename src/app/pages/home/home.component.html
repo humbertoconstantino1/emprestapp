@@ -1,13 +1,17 @@
 <ion-content class="home-content">
   <div class="welcome-section">
     <div class="welcome-header">
-      <div class="welcome-card">
-        <div class="welcome-icon">
-          <ion-icon name="person-outline"></ion-icon>
+      <div class="welcome-card" routerLink="/profile">
+        <div class="welcome-avatar">
+          @if (profilePhoto) {
+            <img [src]="profilePhoto" alt="Foto do perfil" />
+          } @else {
+            <ion-icon name="person"></ion-icon>
+          }
         </div>
         <div class="welcome-text">
           <h2>Olá, {{ userName }}!</h2>
-          <p>Bem-vindo ao EmprestApp</p>
+          <p>Toque para editar perfil</p>
         </div>
       </div>
       <ion-button fill="clear" class="logout-btn" (click)="onLogout()">

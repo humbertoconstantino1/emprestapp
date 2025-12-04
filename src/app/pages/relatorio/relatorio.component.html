@@ -1,28 +1,67 @@
-<div style="max-width: 700px; margin: auto; text-align: center">
-  <!-- Widget À Receber -->
-  <h4>À Receber no mês atual</h4>
-  <apx-chart
-    [series]="gaugeOptions.series"
-    [chart]="gaugeOptions.chart"
-    [plotOptions]="gaugeOptions.plotOptions"
-    [labels]="gaugeOptions.labels"
-    [fill]="gaugeOptions.fill"
-    [dataLabels]="gaugeOptions.dataLabels"
-  >
-  </apx-chart>
-  <ion-item-divider> </ion-item-divider>
+<div class="relatorio-container">
+  <!-- Card À Receber -->
+  <div class="chart-card">
+    <div class="card-header">
+      <div class="card-icon receber">
+        <ion-icon name="wallet-outline"></ion-icon>
+      </div>
+      <div class="card-title">
+        <h3>À Receber</h3>
+        <span>Este mês</span>
+      </div>
+    </div>
+    <div class="gauge-wrapper">
+      <apx-chart
+        [series]="gaugeOptions.series"
+        [chart]="gaugeOptions.chart"
+        [plotOptions]="gaugeOptions.plotOptions"
+        [colors]="gaugeOptions.colors"
+        [labels]="gaugeOptions.labels"
+        [stroke]="gaugeOptions.stroke"
+      >
+      </apx-chart>
+    </div>
+    <div class="gauge-info">
+      <div class="info-item">
+        <span class="label">Meta</span>
+        <span class="value">R$ 5.000</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Recebido</span>
+        <span class="value success">R$ 3.200</span>
+      </div>
+      <div class="info-item">
+        <span class="label">Pendente</span>
+        <span class="value warning">R$ 1.800</span>
+      </div>
+    </div>
+  </div>
 
-  <!-- Gráfico de Colunas -->
-  <div style="margin-top: 40px">
-    <apx-chart
-      [series]="columnSeries"
-      [chart]="columnChartOptions"
-      [xaxis]="columnXAxis"
-      [yaxis]="columnYAxis"
-      [title]="columnTitle"
-      [dataLabels]="columnDataLabels"
-      [fill]="columnFill"
-    >
-    </apx-chart>
+  <!-- Card Receita Mensal -->
+  <div class="chart-card">
+    <div class="card-header">
+      <div class="card-icon receita">
+        <ion-icon name="trending-up-outline"></ion-icon>
+      </div>
+      <div class="card-title">
+        <h3>Receita Mensal</h3>
+        <span>Últimos 6 meses</span>
+      </div>
+    </div>
+    <div class="area-chart-wrapper">
+      <apx-chart
+        [series]="areaSeries"
+        [chart]="areaChartOptions"
+        [xaxis]="areaXAxis"
+        [yaxis]="areaYAxis"
+        [dataLabels]="areaDataLabels"
+        [stroke]="areaStroke"
+        [fill]="areaFill"
+        [colors]="areaColors"
+        [grid]="areaGrid"
+        [tooltip]="areaTooltip"
+      >
+      </apx-chart>
+    </div>
   </div>
 </div>

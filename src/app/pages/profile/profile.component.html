@@ -1,0 +1,133 @@
+<ion-content class="profile-content">
+  <div class="profile-container">
+    <div class="profile-header">
+      <ion-button fill="clear" class="back-btn" routerLink="/home">
+        <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+        Voltar
+      </ion-button>
+    </div>
+
+    <!-- Foto do Perfil -->
+    <div class="avatar-section">
+      <div class="avatar-wrapper" (click)="selectPhoto()">
+        <div class="avatar">
+          @if (profilePhoto) {
+            <img [src]="profilePhoto" alt="Foto do perfil" />
+          } @else {
+            <ion-icon name="person"></ion-icon>
+          }
+        </div>
+        <div class="avatar-edit">
+          <ion-icon name="camera"></ion-icon>
+        </div>
+      </div>
+      <h2>{{ userName }}</h2>
+      <p>{{ userEmail }}</p>
+    </div>
+
+    <!-- Formulário -->
+    <ion-card class="form-card">
+      <ion-card-content>
+        <!-- Meta Mensal -->
+        <div class="section-title">
+          <ion-icon name="flag-outline"></ion-icon>
+          <span>Meta Mensal</span>
+        </div>
+        
+        <div class="input-group">
+          <ion-item lines="none" class="input-item">
+            <ion-icon name="cash-outline" slot="start"></ion-icon>
+            <ion-input
+              type="number"
+              placeholder="Defina sua meta (R$)"
+              [(ngModel)]="metaMensal"
+            ></ion-input>
+          </ion-item>
+          <p class="input-hint">Essa meta será usada no gráfico de relatório</p>
+        </div>
+
+        <ion-button
+          expand="block"
+          class="save-btn meta"
+          (click)="saveMeta()"
+          [disabled]="isSavingMeta"
+        >
+          @if (isSavingMeta) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            Salvar Meta
+          }
+        </ion-button>
+
+        <div class="divider"></div>
+
+        <!-- Alterar Senha -->
+        <div class="section-title">
+          <ion-icon name="lock-closed-outline"></ion-icon>
+          <span>Alterar Senha</span>
+        </div>
+
+        <div class="input-group">
+          <ion-item lines="none" class="input-item">
+            <ion-icon name="key-outline" slot="start"></ion-icon>
+            <ion-input
+              type="password"
+              placeholder="Senha atual"
+              [(ngModel)]="senhaAtual"
+            ></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="input-group">
+          <ion-item lines="none" class="input-item">
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-input
+              type="password"
+              placeholder="Nova senha"
+              [(ngModel)]="novaSenha"
+            ></ion-input>
+          </ion-item>
+        </div>
+
+        <div class="input-group">
+          <ion-item lines="none" class="input-item">
+            <ion-icon name="shield-checkmark-outline" slot="start"></ion-icon>
+            <ion-input
+              type="password"
+              placeholder="Confirmar nova senha"
+              [(ngModel)]="confirmarSenha"
+            ></ion-input>
+          </ion-item>
+        </div>
+
+        @if (senhaError) {
+          <div class="error-message">
+            <ion-text color="danger">{{ senhaError }}</ion-text>
+          </div>
+        }
+
+        @if (senhaSuccess) {
+          <div class="success-message">
+            <ion-text color="success">{{ senhaSuccess }}</ion-text>
+          </div>
+        }
+
+        <ion-button
+          expand="block"
+          class="save-btn senha"
+          (click)="changePassword()"
+          [disabled]="isSavingPassword"
+        >
+          @if (isSavingPassword) {
+            <ion-spinner name="crescent"></ion-spinner>
+          } @else {
+            <ion-icon name="key-outline" slot="start"></ion-icon>
+            Alterar Senha
+          }
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
