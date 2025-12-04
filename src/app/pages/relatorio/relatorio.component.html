@@ -5,15 +5,15 @@
   </div>
 } @else {
   <div class="relatorio-container">
-    <!-- Card À Receber -->
+    <!-- Card Recebido -->
     <div class="chart-card">
       <div class="card-header">
         <div class="card-icon receber">
           <ion-icon name="wallet-outline"></ion-icon>
         </div>
         <div class="card-title">
-          <h3>À Receber</h3>
-          <span>Total ativo</span>
+          <h3>Comparação Mensal</h3>
+          <span>Este mês vs mês anterior</span>
         </div>
       </div>
       <div class="gauge-wrapper">
@@ -29,16 +29,16 @@
       </div>
       <div class="gauge-info">
         <div class="info-item">
-          <span class="label">Meta</span>
-          <span class="value">R$ {{ userMeta | number:'1.0-0':'pt-BR' }}</span>
+          <span class="label">Mês anterior</span>
+          <span class="value">R$ {{ stats?.previousMonthReceived | number:'1.2-2' }}</span>
         </div>
         <div class="info-item">
-          <span class="label">Total</span>
-          <span class="value success">R$ {{ stats?.totalToReceive | number:'1.2-2':'pt-BR' }}</span>
+          <span class="label">Este mês</span>
+          <span class="value success">R$ {{ stats?.currentMonthReceived | number:'1.2-2' }}</span>
         </div>
         <div class="info-item">
-          <span class="label">Atrasados</span>
-          <span class="value warning">{{ stats?.overdueCount || 0 }}</span>
+          <span class="label">A receber este mês</span>
+          <span class="value warning">R$ {{ stats?.totalToReceive | number:'1.2-2' }}</span>
         </div>
       </div>
     </div>
@@ -88,11 +88,11 @@
           <span class="summary-label">Atrasados</span>
         </div>
         <div class="summary-item">
-          <span class="summary-value success">R$ {{ stats?.monthlyValue | number:'1.0-0':'pt-BR' }}</span>
+          <span class="summary-value success">R$ {{ stats?.monthlyValue | number:'1.0-0' }}</span>
           <span class="summary-label">Vence este mês</span>
         </div>
         <div class="summary-item">
-          <span class="summary-value danger">R$ {{ stats?.overdueValue | number:'1.0-0':'pt-BR' }}</span>
+          <span class="summary-value danger">R$ {{ stats?.overdueValue | number:'1.0-0' }}</span>
           <span class="summary-label">Valor atrasado</span>
         </div>
       </div>

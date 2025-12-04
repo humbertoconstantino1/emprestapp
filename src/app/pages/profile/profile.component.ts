@@ -20,8 +20,6 @@ import {
   person,
   cameraOutline,
   camera,
-  flagOutline,
-  cashOutline,
   checkmarkOutline,
   lockClosedOutline,
   keyOutline,
@@ -55,11 +53,6 @@ export class ProfileComponent implements OnInit {
   userEmail: string = '';
   profilePhoto: string | null = null;
 
-  // Meta
-  metaMensal: number | null = null;
-  isSavingMeta: boolean = false;
-  metaSuccess: string = '';
-
   // Senha
   senhaAtual: string = '';
   novaSenha: string = '';
@@ -78,8 +71,6 @@ export class ProfileComponent implements OnInit {
       person,
       cameraOutline,
       camera,
-      flagOutline,
-      cashOutline,
       checkmarkOutline,
       lockClosedOutline,
       keyOutline,
@@ -97,7 +88,6 @@ export class ProfileComponent implements OnInit {
         this.userName = user.name || 'Usuário';
         this.userEmail = user.email || '';
         this.profilePhoto = user.photo || null;
-        this.metaMensal = user.meta || null;
       },
       error: (err) => {
         console.error('Erro ao carregar dados do usuário:', err);
@@ -138,29 +128,6 @@ export class ProfileComponent implements OnInit {
     };
 
     input.click();
-  }
-
-  saveMeta() {
-    if (!this.metaMensal || this.metaMensal <= 0) {
-      return;
-    }
-
-    this.isSavingMeta = true;
-    this.metaSuccess = '';
-
-    this.userService.updateMe({ meta: this.metaMensal }).subscribe({
-      next: () => {
-        this.isSavingMeta = false;
-        this.metaSuccess = 'Meta salva com sucesso!';
-        setTimeout(() => {
-          this.metaSuccess = '';
-        }, 3000);
-      },
-      error: (err) => {
-        this.isSavingMeta = false;
-        console.error('Erro ao salvar meta:', err);
-      },
-    });
   }
 
   changePassword() {

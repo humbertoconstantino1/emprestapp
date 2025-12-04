@@ -31,8 +31,17 @@ export class Loan {
   @Column({ type: 'date', nullable: true })
   dataVencimento: string;
 
+  @Column({ type: 'date', nullable: true })
+  dataPagamento: string;
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  valorJurosPago: number; // Valor dos juros pagos
+
+  @Column('decimal', { precision: 10, scale: 2, nullable: true })
+  valorTotalPago: number; // Valor total pago (principal + juros)
+
   @Column('decimal', { precision: 5, scale: 2, nullable: true })
-  juros: number;
+  juros: number; // Percentual de juros
 
   @Column({ nullable: true })
   endereco: string;

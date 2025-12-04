@@ -13,7 +13,6 @@ export interface User {
 export interface UpdateUserDto {
   name?: string;
   photo?: string;
-  meta?: number;
 }
 
 export interface ChangePasswordDto {

@@ -59,10 +59,16 @@
                   <span class="label">Vencimento</span>
                   <span class="value">{{ loan.dataVencimento | date:'dd/MM/yyyy' }}</span>
                 </div>
+                @if (loan.dataPagamento) {
+                  <div class="detail-item">
+                    <span class="label">Pagamento</span>
+                    <span class="value text-success">{{ loan.dataPagamento | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                }
                 <div class="detail-item">
                   <span class="label">Status</span>
-                  <span class="value" [class.text-success]="loan.status === 'finished'" [class.text-danger]="isOverdue(loan)">
-                    {{ loan.status === 'finished' ? 'Pago' : (isOverdue(loan) ? 'Atrasado' : 'Em dia') }}
+                  <span class="value" [class.text-success]="loan.status === 'finished' || loan.dataPagamento" [class.text-danger]="isOverdue(loan)">
+                    {{ loan.dataPagamento ? 'Pago' : (loan.status === 'finished' ? 'Finalizado' : (isOverdue(loan) ? 'Atrasado' : 'Em dia')) }}
                   </span>
                 </div>
               </div>

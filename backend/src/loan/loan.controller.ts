@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { LoanService } from './loan.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CreateLoanDto, UpdateLoanDto } from './dto/create-loan.dto';
+import { CreateLoanDto, UpdateLoanDto, RenewLoanDto } from './dto/create-loan.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('loans')
@@ -56,6 +56,11 @@ export class LoanController {
   @Put(':id/finish')
   finish(@Param('id') id: string, @Request() req) {
     return this.loanService.finish(+id, req.user.userId);
+  }
+
+  @Put(':id/renew')
+  renew(@Param('id') id: string, @Request() req, @Body() renewLoanDto: RenewLoanDto) {
+    return this.loanService.renew(+id, req.user.userId, renewLoanDto.tipoPagamento, renewLoanDto.dataVencimento);
   }
 
   @Delete(':id')

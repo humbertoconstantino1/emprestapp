@@ -28,46 +28,6 @@
     <!-- Formulário -->
     <ion-card class="form-card">
       <ion-card-content>
-        <!-- Meta Mensal -->
-        <div class="section-title">
-          <ion-icon name="flag-outline"></ion-icon>
-          <span>Meta Mensal</span>
-        </div>
-        
-        <div class="input-group">
-          <ion-item lines="none" class="input-item">
-            <ion-icon name="cash-outline" slot="start"></ion-icon>
-            <ion-input
-              type="number"
-              placeholder="Defina sua meta (R$)"
-              [(ngModel)]="metaMensal"
-            ></ion-input>
-          </ion-item>
-          <p class="input-hint">Essa meta será usada no gráfico de relatório</p>
-        </div>
-
-        @if (metaSuccess) {
-          <div class="success-message">
-            <ion-text color="success">{{ metaSuccess }}</ion-text>
-          </div>
-        }
-
-        <ion-button
-          expand="block"
-          class="save-btn meta"
-          (click)="saveMeta()"
-          [disabled]="isSavingMeta"
-        >
-          @if (isSavingMeta) {
-            <ion-spinner name="crescent"></ion-spinner>
-          } @else {
-            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
-            Salvar Meta
-          }
-        </ion-button>
-
-        <div class="divider"></div>
-
         <!-- Alterar Senha -->
         <div class="section-title">
           <ion-icon name="lock-closed-outline"></ion-icon>

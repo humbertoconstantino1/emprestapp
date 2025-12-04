@@ -16,8 +16,9 @@
       </ion-card-subtitle>
     </div>
     <div class="card-value">
-      <span class="value-label">Valor</span>
-      <span class="value-amount">R$ {{ valor() | number:'1.2-2' }}</span>
+      <span class="value-label">Juros</span>
+      <span class="value-amount">R$ {{ valorJuros | number:'1.2-2' }}</span>
+      <span class="value-percent">{{ juros() || 0 }}%</span>
     </div>
   </ion-card-header>
 
@@ -38,6 +39,10 @@
     <ion-button fill="clear" class="action-btn finish" (click)="onFinalize()">
       <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
       Finalizar
+    </ion-button>
+    <ion-button fill="clear" class="action-btn delete" (click)="onDelete()">
+      <ion-icon name="trash-outline" slot="start"></ion-icon>
+      Excluir
     </ion-button>
   </div>
 </ion-card>
@@ -61,22 +66,27 @@
               <!-- Nova Data de Vencimento -->
               <div class="input-group">
                 <label class="input-label">Nova data de vencimento</label>
-                <ion-item lines="none" class="input-item date-item">
+                <ion-item lines="none" class="input-item">
                   <ion-icon name="calendar-outline" slot="start"></ion-icon>
-                  <span class="date-text">{{ updateForm.get('novaDataVencimento')?.value | date:'dd/MM/yyyy' }}</span>
-                  <ion-datetime-button datetime="update-datetime"></ion-datetime-button>
+                  <ion-input
+                    formControlName="novaDataVencimento"
+                    type="date"
+                    placeholder="Data de vencimento"
+                  ></ion-input>
                 </ion-item>
+              </div>
 
-                <ion-modal [keepContentsMounted]="true">
-                  <ng-template>
-                    <ion-datetime
-                      id="update-datetime"
-                      formControlName="novaDataVencimento"
-                      presentation="date"
-                      [preferWheel]="true"
-                    ></ion-datetime>
-                  </ng-template>
-                </ion-modal>
+              <!-- Data de Pagamento -->
+              <div class="input-group">
+                <label class="input-label">Data de pagamento (opcional)</label>
+                <ion-item lines="none" class="input-item">
+                  <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+                  <ion-input
+                    formControlName="dataPagamento"
+                    type="date"
+                    placeholder="Data de pagamento"
+                  ></ion-input>
+                </ion-item>
               </div>
 
               <!-- Comentário / Anotação -->
@@ -105,6 +115,15 @@
                 </ion-button>
                 <ion-button
                   expand="block"
+                  fill="outline"
+                  class="renew-button"
+                  (click)="openRenewModal()"
+                >
+                  <ion-icon name="refresh-outline" slot="start"></ion-icon>
+                  Renovar
+                </ion-button>
+                <ion-button
+                  expand="block"
                   type="submit"
                   class="save-button"
                 >
@@ -120,6 +139,84 @@
   </ng-template>
 </ion-modal>
 
+<!-- Modal de Renovação -->
+<ion-modal [isOpen]="isRenewModalOpen" (didDismiss)="closeRenewModal()" class="confirm-modal" [backdropDismiss]="true">
+  <ng-template>
+    <div class="confirm-modal-wrapper" (click)="closeRenewModal()">
+      <div class="confirm-modal-content" (click)="$event.stopPropagation()">
+        <div class="confirm-icon">
+          <ion-icon name="refresh-outline"></ion-icon>
+        </div>
+        <h3>Renovar Empréstimo</h3>
+        <p>Escolha o tipo de pagamento para <strong>{{ firstName() }}</strong>:</p>
+        
+        <div class="renew-options">
+          <div class="renew-option" (click)="renewLoan('juros')">
+            <p class="option-title">Pagar apenas os juros</p>
+            <p class="option-detail">Juros ({{ juros() || 0 }}%): R$ {{ valorJuros | number:'1.2-2' }}</p>
+            <p class="option-value">R$ {{ valorJuros | number:'1.2-2' }}</p>
+            <p class="option-description">Renova o empréstimo para o próximo mês</p>
+          </div>
+          <div class="renew-option" (click)="renewLoan('total')">
+            <p class="option-title">Pagar valor total + juros</p>
+            <p class="option-detail">Principal: R$ {{ valor() | number:'1.2-2' }} + Juros ({{ juros() || 0 }}%): R$ {{ valorJuros | number:'1.2-2' }}</p>
+            <p class="option-detail">Total: R$ {{ valor() | number:'1.2-2' }} + R$ {{ valorJuros | number:'1.2-2' }} = R$ {{ valorTotalComJuros | number:'1.2-2' }}</p>
+            <p class="option-value">R$ {{ valorTotalComJuros | number:'1.2-2' }}</p>
+            <p class="option-description">Finaliza o empréstimo completamente</p>
+          </div>
+        </div>
+        
+        <div class="confirm-actions">
+          <ion-button expand="block" fill="outline" class="confirm-cancel" (click)="closeRenewModal()">
+            Cancelar
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal de Confirmação para Renovar -->
+<ion-modal [isOpen]="isRenewConfirmModalOpen" (didDismiss)="closeRenewConfirmModal()" class="confirm-modal" [backdropDismiss]="true">
+  <ng-template>
+    <div class="confirm-modal-wrapper" (click)="closeRenewConfirmModal()">
+      <div class="confirm-modal-content" (click)="$event.stopPropagation()">
+        <div class="confirm-icon">
+          <ion-icon name="refresh-outline"></ion-icon>
+        </div>
+        <h3>Confirmar Renovação?</h3>
+        @if (selectedRenewType === 'juros') {
+          <p>Tem certeza que deseja renovar o empréstimo de <strong>{{ firstName() }}</strong>?</p>
+          <p class="confirm-value">Valor dos juros: <strong>R$ {{ valorJuros | number:'1.2-2' }}</strong></p>
+          <p class="confirm-info">O empréstimo será renovado para o próximo mês.</p>
+        } @else {
+          <p>Tem certeza que deseja finalizar o empréstimo de <strong>{{ firstName() }}</strong>?</p>
+          <div class="confirm-value">
+            <p>Valor principal: <strong>R$ {{ valor() | number:'1.2-2' }}</strong></p>
+            <p>Juros ({{ juros() || 0 }}%): <strong>R$ {{ valorJuros | number:'1.2-2' }}</strong></p>
+            <p class="total-value">Total: <strong>R$ {{ valorTotalComJuros | number:'1.2-2' }}</strong></p>
+          </div>
+        }
+        
+        <div class="confirm-actions">
+          <ion-button fill="outline" class="confirm-cancel" (click)="closeRenewConfirmModal()">
+            Cancelar
+          </ion-button>
+          <ion-button class="confirm-renew" [class.total]="selectedRenewType === 'total'" (click)="confirmRenewLoan()">
+            @if (selectedRenewType === 'juros') {
+              <ion-icon name="cash-outline" slot="start"></ion-icon>
+              Confirmar Renovação
+            } @else {
+              <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+              Confirmar Pagamento
+            }
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
 <!-- Modal de Confirmação para Finalizar -->
 <ion-modal [isOpen]="isConfirmModalOpen" (didDismiss)="closeConfirmModal()" class="confirm-modal" [backdropDismiss]="true">
   <ng-template>
@@ -130,7 +227,11 @@
         </div>
         <h3>Finalizar Empréstimo?</h3>
         <p>Tem certeza que deseja finalizar o empréstimo de <strong>{{ firstName() }}</strong>?</p>
-        <p class="confirm-value">Valor: <strong>R$ {{ valor() | number:'1.2-2' }}</strong></p>
+        <div class="confirm-value">
+          <p>Valor do empréstimo: <strong>R$ {{ valor() | number:'1.2-2' }}</strong></p>
+          <p>Juros ({{ juros() || 0 }}%): <strong>R$ {{ valorJuros | number:'1.2-2' }}</strong></p>
+          <p class="total-value">Total a receber: <strong>R$ {{ valor() | number:'1.2-2' }} + R$ {{ valorJuros | number:'1.2-2' }} = R$ {{ valorTotalComJuros | number:'1.2-2' }}</strong></p>
+        </div>
         
         <div class="confirm-actions">
           <ion-button fill="outline" class="confirm-cancel" (click)="closeConfirmModal()">
@@ -139,6 +240,32 @@
           <ion-button class="confirm-finish" (click)="confirmFinalize()">
             <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
             Confirmar
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal de Confirmação para Excluir -->
+<ion-modal [isOpen]="isDeleteModalOpen" (didDismiss)="closeDeleteModal()" class="confirm-modal" [backdropDismiss]="true">
+  <ng-template>
+    <div class="confirm-modal-wrapper" (click)="closeDeleteModal()">
+      <div class="confirm-modal-content" (click)="$event.stopPropagation()">
+        <div class="confirm-icon">
+          <ion-icon name="trash-outline"></ion-icon>
+        </div>
+        <h3>Excluir Empréstimo?</h3>
+        <p>Tem certeza que deseja excluir o empréstimo de <strong>{{ firstName() }}</strong>?</p>
+        <p class="warning-text">Esta ação não pode ser desfeita.</p>
+        
+        <div class="confirm-actions">
+          <ion-button fill="outline" class="confirm-cancel" (click)="closeDeleteModal()">
+            Cancelar
+          </ion-button>
+          <ion-button class="confirm-delete" color="danger" (click)="confirmDelete()">
+            <ion-icon name="trash-outline" slot="start"></ion-icon>
+            Excluir
           </ion-button>
         </div>
       </div>

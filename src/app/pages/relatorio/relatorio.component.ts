@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { ViewWillEnter } from '@ionic/angular';
 import {
   ApexAxisChartSeries,
   ApexChart,
@@ -17,7 +18,6 @@ import { IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { walletOutline, trendingUpOutline } from 'ionicons/icons';
 import { LoanService, LoanStats } from '../../services/loan.service';
-import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-relatorio',
@@ -25,10 +25,9 @@ import { UserService } from '../../services/user.service';
   styleUrls: ['./relatorio.component.scss'],
   imports: [CommonModule, NgApexchartsModule, IonIcon, IonSpinner],
 })
-export class RelatorioComponent implements OnInit {
+export class RelatorioComponent implements OnInit, ViewWillEnter {
   isLoading = true;
   stats: LoanStats | null = null;
-  userMeta: number = 5000;
 
   // Gauge options
   public gaugeOptions: {
@@ -54,12 +53,12 @@ export class RelatorioComponent implements OnInit {
 
   constructor(
     private loanService: LoanService,
-    private userService: UserService
+    private cdr: ChangeDetectorRef
   ) {
     addIcons({ walletOutline, trendingUpOutline });
 
     // Inicializa gráficos com valores vazios
-    this.gaugeOptions = this.createGaugeOptions(0, 5000);
+    this.gaugeOptions = this.createGaugeOptions(0, 0);
     this.initAreaChart();
   }
 
@@ -67,19 +66,14 @@ export class RelatorioComponent implements OnInit {
     this.loadData();
   }
 
+  ionViewWillEnter() {
+    // Recarrega os dados quando a página for visualizada
+    this.loadData();
+  }
+
   loadData() {
     this.isLoading = true;
-
-    // Carrega a meta do usuário
-    this.userService.getMe().subscribe({
-      next: (user) => {
-        this.userMeta = user.meta || 5000;
-        this.loadStats();
-      },
-      error: () => {
-        this.loadStats();
-      },
-    });
+    this.loadStats();
   }
 
   loadStats() {
@@ -99,30 +93,105 @@ export class RelatorioComponent implements OnInit {
   updateCharts() {
     if (!this.stats) return;
 
-    // Atualiza gauge
-    const valorReceber = this.stats.totalToReceive;
-    this.gaugeOptions = this.createGaugeOptions(valorReceber, this.userMeta);
+    console.log('Atualizando gráficos com stats:', this.stats);
+
+    // Atualiza gauge - compara mês atual com mês anterior
+    const valorRecebidoMesAtual = this.stats.currentMonthReceived || 0;
+    const valorRecebidoMesAnterior = this.stats.previousMonthReceived || 0;
+    
+    this.gaugeOptions = this.createGaugeOptions(valorRecebidoMesAtual, valorRecebidoMesAnterior);
 
     // Atualiza gráfico de área
     if (this.stats.monthlyHistory && this.stats.monthlyHistory.length > 0) {
+      console.log('Histórico mensal:', this.stats.monthlyHistory);
+      
+      // Cria novos objetos para forçar detecção de mudanças
       this.areaSeries = [
         {
           name: 'Receita',
-          data: this.stats.monthlyHistory.map((h) => h.value),
+          data: this.stats.monthlyHistory.map((h) => h.value || 0),
+        },
+      ];
+      
+      // Cria um novo objeto para o XAxis
+      this.areaXAxis = {
+        categories: this.stats.monthlyHistory.map((h) => h.month),
+        labels: {
+          style: {
+            colors: '#6c757d',
+            fontSize: '12px',
+          },
+        },
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
+      };
+    } else {
+      console.warn('Histórico mensal vazio ou não disponível');
+      // Define valores padrão se não houver histórico
+      this.areaSeries = [
+        {
+          name: 'Receita',
+          data: [0, 0, 0, 0, 0, 0],
         },
       ];
       this.areaXAxis = {
-        ...this.areaXAxis,
-        categories: this.stats.monthlyHistory.map((h) => h.month),
+        categories: ['', '', '', '', '', ''],
+        labels: {
+          style: {
+            colors: '#6c757d',
+            fontSize: '12px',
+          },
+        },
+        axisBorder: {
+          show: false,
+        },
+        axisTicks: {
+          show: false,
+        },
       };
     }
+    
+    // Força a detecção de mudanças para atualizar os gráficos
+    this.cdr.detectChanges();
   }
 
   createGaugeOptions(valor: number, meta: number) {
-    const percentual = Math.min((valor / meta) * 100, 100);
+    // Se mês anterior foi 0 e mês atual tem valor, mostra 100% (superou)
+    // Se mês anterior > 0, calcula percentual normalmente
+    let percentual: number;
+    let color: string;
+    
+    if (meta === 0) {
+      // Se não recebeu nada no mês anterior
+      if (valor > 0) {
+        // E recebeu este mês, mostra 100% verde (superou)
+        percentual = 100;
+        color = '#00c853'; // Verde
+      } else {
+        // Não recebeu em nenhum dos dois meses
+        percentual = 0;
+        color = '#e94560'; // Vermelho
+      }
+    } else {
+      // Calcula percentual baseado no mês anterior
+      percentual = (valor / meta) * 100;
+      
+      // Define a cor baseado no percentual
+      if (percentual >= 100) {
+        color = '#00c853'; // Verde (100% ou mais - superou)
+      } else if (percentual >= 50) {
+        color = '#ffa726'; // Laranja (50% a 99%)
+      } else {
+        color = '#e94560'; // Vermelho (menos de 50%)
+      }
+    }
 
     return {
-      series: [percentual],
+      series: [Math.min(percentual, 100)], // Limita a 100% para o gauge
       chart: {
         type: 'radialBar' as const,
         height: 220,
@@ -159,8 +228,8 @@ export class RelatorioComponent implements OnInit {
           },
         },
       },
-      colors: ['#00c853'],
-      labels: ['À Receber'],
+      colors: [color],
+      labels: ['Este mês vs mês anterior'],
       stroke: {
         lineCap: 'round' as const,
       },
@@ -259,8 +328,5 @@ export class RelatorioComponent implements OnInit {
     };
   }
 
-  get pendingValue(): number {
-    if (!this.stats) return 0;
-    return Math.max(this.userMeta - this.stats.totalToReceive, 0);
-  }
 }
+

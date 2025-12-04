@@ -20,8 +20,11 @@ export class ApiService {
   }
 
   get<T>(endpoint: string): Observable<T> {
+    const headers = this.getHeaders().set('Cache-Control', 'no-cache, no-store, must-revalidate')
+      .set('Pragma', 'no-cache')
+      .set('Expires', '0');
     return this.http.get<T>(`${this.API_URL}${endpoint}`, {
-      headers: this.getHeaders(),
+      headers: headers,
     });
   }
 

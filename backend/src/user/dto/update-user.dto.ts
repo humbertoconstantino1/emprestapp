@@ -1,7 +1,6 @@
 export class UpdateUserDto {
   name?: string;
   photo?: string;
-  meta?: number;
 }
 
 export class ChangePasswordDto {

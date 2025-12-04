@@ -30,10 +30,13 @@
               [observation]="loan.observacoes || ''"
               [atrased]="isOverdue(loan)"
               [valor]="loan.valor"
+              [juros]="loan.juros || 0"
               [dataVencimento]="loan.dataVencimento"
               [emprestimoId]="loan.id"
               (finalize)="onFinalizeLoan($event)"
               (update)="onUpdateLoan($event)"
+              (renew)="onRenewLoan($event)"
+              (delete)="onDeleteLoan($event)"
             ></app-card>
           }
         </ion-col>

@@ -13,8 +13,16 @@ export class UpdateLoanDto {
   telefone?: string;
   valor?: number;
   dataVencimento?: string;
+  dataPagamento?: string;
+  valorJurosPago?: number;
+  valorTotalPago?: number;
   juros?: number;
   endereco?: string;
   observacoes?: string;
+}
+
+export class RenewLoanDto {
+  tipoPagamento: 'juros' | 'total'; // 'juros' = só juros, 'total' = valor + juros
+  dataVencimento?: string; // Nova data de vencimento calculada pelo frontend (data atual + 1 mês)
 }
 

@@ -3,8 +3,11 @@
     <div class="welcome-header">
       <div class="welcome-card" routerLink="/profile">
         <div class="welcome-avatar">
-          <img *ngIf="profilePhoto" [src]="profilePhoto" alt="Foto do perfil" />
-          <ion-icon *ngIf="!profilePhoto" name="person"></ion-icon>
+          @if (profilePhoto) {
+            <img [src]="profilePhoto" alt="Foto do perfil" />
+          } @else {
+            <ion-icon name="person"></ion-icon>
+          }
         </div>
         <div class="welcome-text">
           <h2>Olá, {{ userName }}!</h2>
