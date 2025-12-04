@@ -115,7 +115,6 @@ export class LoanService {
       if (dataVencimentoEnviada) {
         // Usa a data calculada pelo frontend (data atual do empréstimo + 1 mês)
         novaDataVencimento = dataVencimentoEnviada;
-        console.log(`Renovando empréstimo ${loan.id}: Usando data de vencimento enviada pelo frontend = ${novaDataVencimento}`);
       } else {
         // Fallback: calcula baseado na data atual do empréstimo + 1 mês
         // Parse manual para evitar problemas de timezone
@@ -131,7 +130,6 @@ export class LoanService {
         const newMonth = String(nextMonth.getMonth() + 1).padStart(2, '0');
         const newDay = String(nextMonth.getDate()).padStart(2, '0');
         novaDataVencimento = `${newYear}-${newMonth}-${newDay}`;
-        console.log(`Renovando empréstimo ${loan.id}: Calculando nova data de vencimento = ${novaDataVencimento}`);
       }
       
       // Atualiza diretamente no banco usando update para garantir persistência
@@ -150,8 +148,6 @@ export class LoanService {
       loan.valorJurosPago = (parseFloat(String(loan.valorJurosPago)) || 0) + valorJuros;
       loan.dataPagamento = new Date().toISOString().split('T')[0];
       loan.status = LoanStatus.ACTIVE;
-      
-      console.log(`Empréstimo ${loan.id} renovado. Nova data de vencimento: ${loan.dataVencimento}`);
     } else {
       // Pagou valor total + juros - finaliza o empréstimo
       const valor = parseFloat(String(loan.valor));
@@ -175,9 +171,6 @@ export class LoanService {
     if (updatedLoan && updatedLoan.user.id !== userId) {
       throw new ForbiddenException('Você não tem permissão para acessar este empréstimo');
     }
-    
-    console.log(`Empréstimo ${savedLoan.id} salvo. Data de vencimento no objeto salvo: ${savedLoan.dataVencimento}`);
-    console.log(`Empréstimo ${updatedLoan?.id} após reload. Data de vencimento: ${updatedLoan?.dataVencimento}`);
     
     // Retorna o empréstimo recarregado do banco (garantindo dados atualizados)
     return updatedLoan || savedLoan;

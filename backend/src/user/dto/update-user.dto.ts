@@ -8,3 +8,14 @@ export class ChangePasswordDto {
   newPassword: string;
 }
 
+export class AdminResetPasswordDto {
+  userId: number;
+  newPassword: string;
+}
+
+export class AdminUpdateUserDto {
+  name?: string;
+  photo?: string;
+  blocked?: boolean;
+}
+

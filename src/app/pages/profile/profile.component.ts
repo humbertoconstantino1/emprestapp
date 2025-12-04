@@ -89,8 +89,7 @@ export class ProfileComponent implements OnInit {
         this.userEmail = user.email || '';
         this.profilePhoto = user.photo || null;
       },
-      error: (err) => {
-        console.error('Erro ao carregar dados do usuário:', err);
+      error: () => {
         const user = this.authService.getUser();
         this.userName = user?.name || 'Usuário';
         this.userEmail = user?.email || '';
@@ -106,28 +105,134 @@ export class ProfileComponent implements OnInit {
     input.onchange = (event: any) => {
       const file = event.target.files[0];
       if (file) {
-        if (file.size > 2 * 1024 * 1024) {
-          alert('A imagem deve ter no máximo 2MB');
-          return;
-        }
+        // Comprimir a imagem de forma inteligente
+        this.compressImage(file, (compressedBase64: string) => {
+          // Verifica o tamanho do base64 (aproximadamente 33% maior que o original)
+          const base64Size = (compressedBase64.length * 3) / 4;
+          const maxSize = 500 * 1024; // 500KB máximo
 
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          const photo = e.target.result;
-          this.profilePhoto = photo;
-
-          this.userService.updateMe({ photo }).subscribe({
-            next: () => {},
-            error: (err) => {
-              console.error('Erro ao salvar foto:', err);
-            },
-          });
-        };
-        reader.readAsDataURL(file);
+          if (base64Size > maxSize) {
+            // Se ainda for muito grande, comprime mais agressivamente
+            this.compressImageAggressively(file, (moreCompressed: string) => {
+              this.profilePhoto = moreCompressed;
+              this.savePhoto(moreCompressed);
+            });
+          } else {
+            this.profilePhoto = compressedBase64;
+            this.savePhoto(compressedBase64);
+          }
+        });
       }
     };
 
     input.click();
+  }
+
+  private compressImage(file: File, callback: (base64: string) => void) {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Tamanho otimizado para foto de perfil (400x400 é suficiente)
+        const MAX_SIZE = 400;
+        let width = img.width;
+        let height = img.height;
+
+        // Calcula o novo tamanho mantendo proporção
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = (height * MAX_SIZE) / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = (width * MAX_SIZE) / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Melhora a qualidade do redimensionamento
+        ctx!.imageSmoothingEnabled = true;
+        ctx!.imageSmoothingQuality = 'high';
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Converte para JPEG com qualidade 0.75 (boa qualidade mas menor tamanho)
+        const base64 = canvas.toDataURL('image/jpeg', 0.75);
+        callback(base64);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private compressImageAggressively(file: File, callback: (base64: string) => void) {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // Tamanho ainda menor (300x300)
+        const MAX_SIZE = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_SIZE) {
+            height = (height * MAX_SIZE) / width;
+            width = MAX_SIZE;
+          }
+        } else {
+          if (height > MAX_SIZE) {
+            width = (width * MAX_SIZE) / height;
+            height = MAX_SIZE;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx!.imageSmoothingEnabled = true;
+        ctx!.imageSmoothingQuality = 'medium';
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // Qualidade mais baixa (0.6) para reduzir ainda mais o tamanho
+        let quality = 0.6;
+        let base64 = canvas.toDataURL('image/jpeg', quality);
+        
+        // Se ainda for muito grande, reduz qualidade progressivamente
+        while ((base64.length * 3) / 4 > 500 * 1024 && quality > 0.3) {
+          quality -= 0.1;
+          base64 = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        callback(base64);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private savePhoto(photo: string) {
+    this.userService.updateMe({ photo }).subscribe({
+      next: () => {
+        alert('Foto atualizada com sucesso!');
+      },
+      error: (err) => {
+        if (err.status === 413) {
+          alert('A imagem ainda é muito grande. Tente uma imagem menor ou de menor resolução.');
+        } else {
+          alert('Erro ao salvar foto. Tente novamente.');
+        }
+      },
+    });
   }
 
   changePassword() {

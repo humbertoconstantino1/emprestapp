@@ -83,8 +83,7 @@ export class RelatorioComponent implements OnInit, ViewWillEnter {
         this.updateCharts();
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error('Erro ao carregar estatísticas:', err);
+      error: () => {
         this.isLoading = false;
       },
     });
@@ -92,8 +91,6 @@ export class RelatorioComponent implements OnInit, ViewWillEnter {
 
   updateCharts() {
     if (!this.stats) return;
-
-    console.log('Atualizando gráficos com stats:', this.stats);
 
     // Atualiza gauge - compara mês atual com mês anterior
     const valorRecebidoMesAtual = this.stats.currentMonthReceived || 0;
@@ -103,7 +100,6 @@ export class RelatorioComponent implements OnInit, ViewWillEnter {
 
     // Atualiza gráfico de área
     if (this.stats.monthlyHistory && this.stats.monthlyHistory.length > 0) {
-      console.log('Histórico mensal:', this.stats.monthlyHistory);
       
       // Cria novos objetos para forçar detecção de mudanças
       this.areaSeries = [
@@ -130,7 +126,6 @@ export class RelatorioComponent implements OnInit, ViewWillEnter {
         },
       };
     } else {
-      console.warn('Histórico mensal vazio ou não disponível');
       // Define valores padrão se não houver histórico
       this.areaSeries = [
         {

@@ -61,6 +61,15 @@ export class AuthService {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
+  isAdmin(): boolean {
+    const user = this.getUser();
+    if (!user || !user.email) {
+      return false;
+    }
+    // Comparação case-insensitive para garantir que funcione
+    return user.email.toLowerCase() === 'humbertoconstantino73@gmail.com';
+  }
+
   getUser(): any {
     const user = localStorage.getItem(this.USER_KEY);
     if (!user || user === 'undefined' || user === 'null') {

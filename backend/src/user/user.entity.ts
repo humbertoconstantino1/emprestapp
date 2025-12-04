@@ -21,6 +21,9 @@ export class User {
   @Column({ nullable: true, type: 'decimal', precision: 10, scale: 2 })
   meta: number;
 
+  @Column({ default: false })
+  blocked: boolean;
+
   @OneToMany(() => Loan, (loan) => loan.user)
   loans: Loan[];
 }

@@ -8,6 +8,7 @@ export interface User {
   name: string;
   photo?: string;
   meta?: number;
+  blocked?: boolean;
 }
 
 export interface UpdateUserDto {

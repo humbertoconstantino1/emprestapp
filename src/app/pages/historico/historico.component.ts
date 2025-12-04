@@ -72,8 +72,7 @@ export class HistoricoComponent implements OnInit {
         this.loans = loans;
         this.isLoading = false;
       },
-      error: (err) => {
-        console.error('Erro ao carregar histórico:', err);
+      error: () => {
         this.isLoading = false;
       },
     });

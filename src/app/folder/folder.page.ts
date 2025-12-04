@@ -73,18 +73,13 @@ export class FolderPage implements OnInit, ViewWillEnter {
     
     this.loanService.getActive().subscribe({
       next: (loans) => {
-        console.log('Empréstimos carregados:', loans);
-        loans.forEach(loan => {
-          console.log(`Empréstimo ${loan.id} - Nome: ${loan.nome}, Data Vencimento: ${loan.dataVencimento}`);
-        });
         // Cria um novo array para forçar detecção de mudanças
         this.loans = [...loans];
         this.isLoading = false;
         // Força detecção de mudanças após atualizar os dados
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Erro ao carregar empréstimos:', err);
+      error: () => {
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -100,9 +95,7 @@ export class FolderPage implements OnInit, ViewWillEnter {
       next: () => {
         this.loadLoans(); // Recarrega a lista
       },
-      error: (err) => {
-        console.error('Erro ao finalizar empréstimo:', err);
-      },
+      error: () => {},
     });
   }
 
@@ -129,9 +122,7 @@ export class FolderPage implements OnInit, ViewWillEnter {
       next: () => {
         this.loadLoans();
       },
-      error: (err) => {
-        console.error('Erro ao atualizar empréstimo:', err);
-      },
+      error: () => {},
     });
   }
 
@@ -140,16 +131,12 @@ export class FolderPage implements OnInit, ViewWillEnter {
     const loanAtual = this.loans.find(l => l.id === data.id);
     
     if (!loanAtual) {
-      console.error('Empréstimo não encontrado na lista');
       return;
     }
     
     // Chama o serviço passando a data de vencimento atual para cálculo
     this.loanService.renew(data.id, data.tipoPagamento, loanAtual.dataVencimento).subscribe({
       next: (updatedLoan) => {
-        console.log('Empréstimo renovado:', updatedLoan);
-        console.log('Nova data de vencimento retornada:', updatedLoan.dataVencimento);
-        
         // Atualiza o empréstimo na lista local
         const index = this.loans.findIndex(l => l.id === updatedLoan.id);
         if (index !== -1) {
@@ -163,8 +150,7 @@ export class FolderPage implements OnInit, ViewWillEnter {
           this.loadLoans();
         }, 500);
       },
-      error: (err) => {
-        console.error('Erro ao renovar empréstimo:', err);
+      error: () => {
         // Recarrega mesmo em caso de erro para garantir consistência
         this.loadLoans();
       },
@@ -174,15 +160,13 @@ export class FolderPage implements OnInit, ViewWillEnter {
   onDeleteLoan(loanId: number) {
     this.loanService.delete(loanId).subscribe({
       next: () => {
-        console.log('Empréstimo excluído com sucesso');
         // Remove o empréstimo da lista local
         this.loans = this.loans.filter(l => l.id !== loanId);
         this.cdr.detectChanges();
         // Recarrega a lista para garantir consistência
         this.loadLoans();
       },
-      error: (err) => {
-        console.error('Erro ao excluir empréstimo:', err);
+      error: () => {
         // Recarrega mesmo em caso de erro para garantir consistência
         this.loadLoans();
       },

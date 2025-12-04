@@ -1,0 +1,174 @@
+<ion-content class="page-content">
+  <div class="page-header">
+    <ion-button fill="clear" class="back-btn" routerLink="/home">
+      <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+      Voltar
+    </ion-button>
+    <h1>Painel Administrativo</h1>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Carregando usuários...</p>
+    </div>
+  } @else {
+    <div class="users-container">
+      @for (user of users; track user.id) {
+        <ion-card class="user-card">
+          <ion-card-header>
+            <div class="user-header">
+              <div class="user-avatar">
+                @if (user.photo) {
+                  <img [src]="user.photo" alt="Foto" />
+                } @else {
+                  <ion-icon name="person-outline"></ion-icon>
+                }
+              </div>
+              <div class="user-info">
+                <ion-card-title>{{ user.name }}</ion-card-title>
+                <ion-card-subtitle>{{ user.email }}</ion-card-subtitle>
+                @if (user.blocked) {
+                  <ion-badge color="danger">Bloqueado</ion-badge>
+                } @else {
+                  <ion-badge color="success">Ativo</ion-badge>
+                }
+              </div>
+            </div>
+          </ion-card-header>
+
+          <ion-card-content>
+            <div class="user-actions">
+              <ion-button fill="outline" size="small" (click)="openLoansModal(user)">
+                <ion-icon name="list-outline" slot="start"></ion-icon>
+                Ver Empréstimos ({{ user.loans?.length || 0 }})
+              </ion-button>
+              <ion-button fill="outline" size="small" (click)="openPasswordModal(user)">
+                <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+                Resetar Senha
+              </ion-button>
+              <ion-button fill="outline" size="small" (click)="openPhotoModal(user)">
+                <ion-icon name="image-outline" slot="start"></ion-icon>
+                Alterar Foto
+              </ion-button>
+              <ion-button 
+                [color]="user.blocked ? 'success' : 'danger'" 
+                fill="outline" 
+                size="small" 
+                (click)="toggleBlock(user)">
+                <ion-icon [name]="user.blocked ? 'checkmark-circle-outline' : 'ban-outline'" slot="start"></ion-icon>
+                {{ user.blocked ? 'Desbloquear' : 'Bloquear' }}
+              </ion-button>
+            </div>
+          </ion-card-content>
+        </ion-card>
+      }
+    </div>
+  }
+</ion-content>
+
+<!-- Modal de Resetar Senha -->
+<ion-modal [isOpen]="isPasswordModalOpen" (didDismiss)="closePasswordModal()">
+  <ng-template>
+    <ion-content class="modal-content">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>Resetar Senha</h2>
+          <p>{{ selectedUser?.name }}</p>
+        </div>
+
+        <form [formGroup]="passwordForm" (ngSubmit)="resetPassword()">
+          <ion-item>
+            <ion-label position="stacked">Nova Senha</ion-label>
+            <ion-input
+              formControlName="newPassword"
+              type="password"
+              placeholder="Digite a nova senha"
+            ></ion-input>
+          </ion-item>
+          @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched) {
+            <ion-text color="danger">
+              <p>A senha deve ter pelo menos 6 caracteres</p>
+            </ion-text>
+          }
+
+          <div class="modal-actions">
+            <ion-button fill="outline" (click)="closePasswordModal()">Cancelar</ion-button>
+            <ion-button type="submit" [disabled]="passwordForm.invalid">Resetar</ion-button>
+          </div>
+        </form>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal de Alterar Foto -->
+<ion-modal [isOpen]="isPhotoModalOpen" (didDismiss)="closePhotoModal()">
+  <ng-template>
+    <ion-content class="modal-content">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>Alterar Foto</h2>
+          <p>{{ selectedUser?.name }}</p>
+        </div>
+
+        @if (photoForm.value.photo) {
+          <div class="photo-preview">
+            <img [src]="photoForm.value.photo" alt="Preview" />
+          </div>
+        }
+
+        <form [formGroup]="photoForm" (ngSubmit)="updatePhoto()">
+          <ion-button fill="outline" (click)="selectPhoto()">
+            <ion-icon name="image-outline" slot="start"></ion-icon>
+            Selecionar Foto
+          </ion-button>
+
+          <div class="modal-actions">
+            <ion-button fill="outline" (click)="closePhotoModal()">Cancelar</ion-button>
+            <ion-button type="submit" [disabled]="!photoForm.value.photo">Salvar</ion-button>
+          </div>
+        </form>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal de Empréstimos -->
+<ion-modal [isOpen]="isLoansModalOpen" (didDismiss)="closeLoansModal()">
+  <ng-template>
+    <ion-content class="modal-content">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>Empréstimos de {{ selectedUser?.name }}</h2>
+        </div>
+
+        @if (selectedUser && selectedUser.loans && selectedUser.loans.length > 0) {
+          <div class="loans-list">
+            @for (loan of selectedUser.loans; track loan.id) {
+              <ion-card class="loan-item">
+                <ion-card-content>
+                  <p><strong>Cliente:</strong> {{ loan.nome }}</p>
+                  <p><strong>Valor:</strong> R$ {{ loan.valor | number:'1.2-2' }}</p>
+                  <p><strong>Juros:</strong> {{ loan.juros || 0 }}%</p>
+                  <p><strong>Vencimento:</strong> {{ loan.dataVencimento | date:'dd/MM/yyyy' }}</p>
+                  <p><strong>Status:</strong> {{ getLoanStatus(loan) }}</p>
+                  @if (loan.dataPagamento) {
+                    <p><strong>Pago em:</strong> {{ loan.dataPagamento | date:'dd/MM/yyyy' }}</p>
+                  }
+                </ion-card-content>
+              </ion-card>
+            }
+          </div>
+        } @else {
+          <p>Nenhum empréstimo encontrado.</p>
+        }
+
+        <div class="modal-actions">
+          <ion-button fill="outline" (click)="closeLoansModal()">Fechar</ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+

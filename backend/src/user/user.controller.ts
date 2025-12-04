@@ -11,7 +11,8 @@ import {
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
+import { UpdateUserDto, ChangePasswordDto, AdminResetPasswordDto, AdminUpdateUserDto } from './dto/update-user.dto';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @UseGuards(JwtAuthGuard)
 @Controller('users')
@@ -53,5 +54,36 @@ export class UserController {
       changePasswordDto.currentPassword,
       changePasswordDto.newPassword,
     );
+  }
+
+  // Endpoints administrativos
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('admin/all')
+  async getAllUsers() {
+    return this.userService.findAllUsers();
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('admin/:id')
+  async getUserById(@Param('id') id: string) {
+    return this.userService.findUserById(+id);
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Post('admin/reset-password')
+  async adminResetPassword(@Body() resetPasswordDto: AdminResetPasswordDto) {
+    return this.userService.adminResetPassword(
+      resetPasswordDto.userId,
+      resetPasswordDto.newPassword,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Put('admin/:id')
+  async adminUpdateUser(
+    @Param('id') id: string,
+    @Body() updateUserDto: AdminUpdateUserDto,
+  ) {
+    return this.userService.adminUpdateUser(+id, updateUserDto);
   }
 }

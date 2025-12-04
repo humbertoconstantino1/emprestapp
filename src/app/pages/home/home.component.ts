@@ -24,6 +24,7 @@ import {
   person,
   logOutOutline,
   timeOutline,
+  shieldOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
@@ -51,6 +52,7 @@ import { UserService } from '../../services/user.service';
 export class HomeComponent implements OnInit, ViewWillEnter {
   userName: string = '';
   profilePhoto: string | null = null;
+  isAdmin: boolean = false;
 
   constructor(
     private authService: AuthService,
@@ -65,6 +67,7 @@ export class HomeComponent implements OnInit, ViewWillEnter {
       person,
       logOutOutline,
       timeOutline,
+      shieldOutline,
     });
   }
 
@@ -77,15 +80,21 @@ export class HomeComponent implements OnInit, ViewWillEnter {
   }
 
   loadUserData() {
+    // Verifica admin antes de carregar dados
+    this.isAdmin = this.authService.isAdmin();
+    
     this.userService.getMe().subscribe({
       next: (user) => {
         this.userName = user.name || 'Usuário';
         this.profilePhoto = user.photo || null;
+        // Verifica admin usando o email da API também
+        this.isAdmin = user.email?.toLowerCase() === 'humbertoconstantino73@gmail.com' || this.authService.isAdmin();
       },
       error: () => {
         const user = this.authService.getUser();
         this.userName = user?.name || 'Usuário';
         this.profilePhoto = null;
+        this.isAdmin = this.authService.isAdmin();
       },
     });
   }

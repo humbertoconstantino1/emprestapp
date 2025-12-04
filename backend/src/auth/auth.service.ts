@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
@@ -15,6 +15,10 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userService.findByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
+      // Verifica se o usuário está bloqueado
+      if (user.blocked) {
+        throw new UnauthorizedException('Usuário bloqueado. Entre em contato com o administrador.');
+      }
       const { password: _, ...result } = user;
       return result;
     }
