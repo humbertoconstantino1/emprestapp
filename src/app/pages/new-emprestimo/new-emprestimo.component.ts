@@ -13,11 +13,8 @@ import {
   IonItem,
   IonTextarea,
   IonInput,
-  IonDatetime,
   IonSelect,
   IonSelectOption,
-  IonModal,
-  IonDatetimeButton,
   IonCard,
   IonCardContent,
   IonIcon,
@@ -53,11 +50,8 @@ import { LoanService, CreateLoanDto } from '../../services/loan.service';
     IonItem,
     IonTextarea,
     IonInput,
-    IonDatetime,
     IonSelect,
     IonSelectOption,
-    IonModal,
-    IonDatetimeButton,
     IonCard,
     IonCardContent,
     IonIcon,
@@ -100,7 +94,19 @@ export class NewEmprestimoComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    // Define a data padrão como um mês a partir de hoje
+    const today = new Date();
+    const nextMonth = new Date(today);
+    nextMonth.setMonth(today.getMonth() + 1);
+    
+    // Formata para YYYY-MM-DD (formato do input type="date")
+    const defaultDate = nextMonth.toISOString().split('T')[0];
+    
+    this.clientForm.patchValue({
+      dataVencimento: defaultDate
+    });
+  }
 
   submitForm() {
     if (this.clientForm.valid) {

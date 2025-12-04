@@ -12,6 +12,7 @@ import {
   IonGrid,
   IonRow,
   IonCol,
+  ViewWillEnter,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -22,6 +23,7 @@ import {
   personOutline,
   person,
   logOutOutline,
+  timeOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
 import { UserService } from '../../services/user.service';
@@ -46,7 +48,7 @@ import { UserService } from '../../services/user.service';
     IonCol,
   ],
 })
-export class HomeComponent implements OnInit {
+export class HomeComponent implements OnInit, ViewWillEnter {
   userName: string = '';
   profilePhoto: string | null = null;
 
@@ -62,32 +64,28 @@ export class HomeComponent implements OnInit {
       personOutline,
       person,
       logOutOutline,
+      timeOutline,
     });
   }
 
   ngOnInit() {
-    // Primeiro carrega dados locais
-    const user = this.authService.getUser();
-    this.userName = user?.name || 'Usuário';
-    this.profilePhoto = user?.photo || null;
+    this.loadUserData();
+  }
 
-    // Depois atualiza com dados da API
+  ionViewWillEnter() {
+    this.loadUserData();
+  }
+
+  loadUserData() {
     this.userService.getMe().subscribe({
-      next: (userData) => {
-        this.userName = userData.name || 'Usuário';
-        this.profilePhoto = userData.photo || null;
-
-        // Atualiza localStorage
-        const currentUser = this.authService.getUser();
-        if (currentUser) {
-          currentUser.name = userData.name;
-          currentUser.photo = userData.photo;
-          currentUser.meta = userData.meta;
-          localStorage.setItem('auth_user', JSON.stringify(currentUser));
-        }
+      next: (user) => {
+        this.userName = user.name || 'Usuário';
+        this.profilePhoto = user.photo || null;
       },
       error: () => {
-        // Mantém dados locais em caso de erro
+        const user = this.authService.getUser();
+        this.userName = user?.name || 'Usuário';
+        this.profilePhoto = null;
       },
     });
   }

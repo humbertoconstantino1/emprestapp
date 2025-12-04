@@ -27,7 +27,7 @@
           @for (loan of loans; track loan.id) {
             <app-card
               [firstName]="loan.nome"
-              [observation]="loan.observacoes"
+              [observation]="loan.observacoes || ''"
               [atrased]="isOverdue(loan)"
               [valor]="loan.valor"
               [dataVencimento]="loan.dataVencimento"

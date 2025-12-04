@@ -1,0 +1,97 @@
+<ion-content class="historico-content">
+  <div class="page-header">
+    <ion-button fill="clear" class="back-btn" routerLink="/home">
+      <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+      Voltar
+    </ion-button>
+    <h1>Histórico</h1>
+  </div>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Carregando histórico...</p>
+    </div>
+  } @else if (loans.length === 0) {
+    <div class="empty-container">
+      <ion-icon name="time-outline" class="empty-icon"></ion-icon>
+      <p>Nenhum empréstimo encontrado.</p>
+    </div>
+  } @else {
+    <div class="historico-list">
+      <ion-accordion-group>
+        @for (loan of loans; track loan.id) {
+          <ion-accordion [value]="loan.id.toString()">
+            <ion-item slot="header" class="accordion-header">
+              <div class="loan-header">
+                <div class="loan-avatar">
+                  <ion-icon name="person"></ion-icon>
+                </div>
+                <div class="loan-info">
+                  <h3>{{ loan.nome }}</h3>
+                  <p class="loan-value">R$ {{ loan.valor | number:'1.2-2' }}</p>
+                </div>
+                <div class="loan-status" [class.finished]="loan.status === 'finished'" [class.overdue]="isOverdue(loan)" [class.active]="loan.status === 'active' && !isOverdue(loan)">
+                  @if (loan.status === 'finished') {
+                    <ion-icon name="checkmark-circle"></ion-icon>
+                    <span>Finalizado</span>
+                  } @else if (isOverdue(loan)) {
+                    <ion-icon name="alert-circle"></ion-icon>
+                    <span>Atrasado</span>
+                  } @else {
+                    <ion-icon name="time"></ion-icon>
+                    <span>Em dia</span>
+                  }
+                </div>
+              </div>
+            </ion-item>
+            <div slot="content" class="accordion-content">
+              <div class="detail-grid">
+                <div class="detail-item">
+                  <span class="label">Valor</span>
+                  <span class="value">R$ {{ loan.valor | number:'1.2-2' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Juros</span>
+                  <span class="value">{{ loan.juros || 0 }}%</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Vencimento</span>
+                  <span class="value">{{ loan.dataVencimento | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="detail-item">
+                  <span class="label">Status</span>
+                  <span class="value" [class.text-success]="loan.status === 'finished'" [class.text-danger]="isOverdue(loan)">
+                    {{ loan.status === 'finished' ? 'Pago' : (isOverdue(loan) ? 'Atrasado' : 'Em dia') }}
+                  </span>
+                </div>
+              </div>
+              @if (loan.telefone) {
+                <div class="detail-row">
+                  <ion-icon name="call-outline"></ion-icon>
+                  <span>{{ loan.telefone }}</span>
+                </div>
+              }
+              @if (loan.endereco) {
+                <div class="detail-row">
+                  <ion-icon name="location-outline"></ion-icon>
+                  <span>{{ loan.endereco }}</span>
+                </div>
+              }
+              @if (loan.observacoes) {
+                <div class="detail-row observation">
+                  <ion-icon name="document-text-outline"></ion-icon>
+                  <span>{{ loan.observacoes }}</span>
+                </div>
+              }
+              <div class="detail-footer">
+                <span class="created-at">Criado em {{ loan.createdAt | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+          </ion-accordion>
+        }
+      </ion-accordion-group>
+    </div>
+  }
+</ion-content>
+

@@ -79,25 +79,14 @@
 
           <!-- Data de Vencimento -->
           <div class="input-group">
-            <ion-item lines="none" class="input-item date-item">
+            <ion-item lines="none" class="input-item">
               <ion-icon name="calendar-outline" slot="start"></ion-icon>
-              <span class="date-label">Data de vencimento</span>
-              <ion-datetime-button
-                datetime="datetime"
-                class="datetime-btn"
-              ></ion-datetime-button>
+              <ion-input
+                formControlName="dataVencimento"
+                type="date"
+                placeholder="Data de vencimento"
+              ></ion-input>
             </ion-item>
-
-            <ion-modal [keepContentsMounted]="true">
-              <ng-template>
-                <ion-datetime
-                  id="datetime"
-                  formControlName="dataVencimento"
-                  presentation="date"
-                  [preferWheel]="true"
-                ></ion-datetime>
-              </ng-template>
-            </ion-modal>
           </div>
 
           <!-- Observações -->

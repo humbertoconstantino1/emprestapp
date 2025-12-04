@@ -98,19 +98,9 @@ export class ProfileComponent implements OnInit {
         this.userEmail = user.email || '';
         this.profilePhoto = user.photo || null;
         this.metaMensal = user.meta || null;
-
-        // Atualiza os dados do usuário no localStorage
-        const currentUser = this.authService.getUser();
-        if (currentUser) {
-          currentUser.name = user.name;
-          currentUser.photo = user.photo;
-          currentUser.meta = user.meta;
-          localStorage.setItem('auth_user', JSON.stringify(currentUser));
-        }
       },
       error: (err) => {
         console.error('Erro ao carregar dados do usuário:', err);
-        // Fallback para dados locais
         const user = this.authService.getUser();
         this.userName = user?.name || 'Usuário';
         this.userEmail = user?.email || '';
@@ -126,7 +116,6 @@ export class ProfileComponent implements OnInit {
     input.onchange = (event: any) => {
       const file = event.target.files[0];
       if (file) {
-        // Limitar tamanho (max 2MB)
         if (file.size > 2 * 1024 * 1024) {
           alert('A imagem deve ter no máximo 2MB');
           return;
@@ -137,16 +126,8 @@ export class ProfileComponent implements OnInit {
           const photo = e.target.result;
           this.profilePhoto = photo;
 
-          // Salvar na API
           this.userService.updateMe({ photo }).subscribe({
-            next: (user) => {
-              // Atualiza localStorage
-              const currentUser = this.authService.getUser();
-              if (currentUser) {
-                currentUser.photo = photo;
-                localStorage.setItem('auth_user', JSON.stringify(currentUser));
-              }
-            },
+            next: () => {},
             error: (err) => {
               console.error('Erro ao salvar foto:', err);
             },
@@ -168,17 +149,9 @@ export class ProfileComponent implements OnInit {
     this.metaSuccess = '';
 
     this.userService.updateMe({ meta: this.metaMensal }).subscribe({
-      next: (user) => {
+      next: () => {
         this.isSavingMeta = false;
         this.metaSuccess = 'Meta salva com sucesso!';
-
-        // Atualiza localStorage
-        const currentUser = this.authService.getUser();
-        if (currentUser) {
-          currentUser.meta = this.metaMensal;
-          localStorage.setItem('auth_user', JSON.stringify(currentUser));
-        }
-
         setTimeout(() => {
           this.metaSuccess = '';
         }, 3000);
@@ -223,7 +196,6 @@ export class ProfileComponent implements OnInit {
           this.senhaAtual = '';
           this.novaSenha = '';
           this.confirmarSenha = '';
-
           setTimeout(() => {
             this.senhaSuccess = '';
           }, 3000);

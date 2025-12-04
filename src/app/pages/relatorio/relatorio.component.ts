@@ -42,15 +42,15 @@ export class RelatorioComponent implements OnInit {
 
   // Area chart options
   public areaSeries: ApexAxisChartSeries = [];
-  public areaChartOptions: ApexChart;
-  public areaXAxis: ApexXAxis;
-  public areaYAxis: ApexYAxis;
-  public areaDataLabels: ApexDataLabels;
-  public areaStroke: ApexStroke;
-  public areaFill: ApexFill;
-  public areaColors: string[];
-  public areaGrid: ApexGrid;
-  public areaTooltip: ApexTooltip;
+  public areaChartOptions!: ApexChart;
+  public areaXAxis!: ApexXAxis;
+  public areaYAxis!: ApexYAxis;
+  public areaDataLabels!: ApexDataLabels;
+  public areaStroke!: ApexStroke;
+  public areaFill!: ApexFill;
+  public areaColors!: string[];
+  public areaGrid!: ApexGrid;
+  public areaTooltip!: ApexTooltip;
 
   constructor(
     private loanService: LoanService,

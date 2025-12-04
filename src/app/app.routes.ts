@@ -27,6 +27,12 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'historico',
+    loadComponent: () =>
+      import('./pages/historico/historico.component').then((m) => m.HistoricoComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'folder/:id',
     loadComponent: () =>
       import('./folder/folder.page').then((m) => m.FolderPage),
