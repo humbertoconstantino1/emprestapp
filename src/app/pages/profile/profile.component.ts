@@ -28,6 +28,7 @@ import {
   shieldCheckmarkOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-profile',
@@ -57,6 +58,7 @@ export class ProfileComponent implements OnInit {
   // Meta
   metaMensal: number | null = null;
   isSavingMeta: boolean = false;
+  metaSuccess: string = '';
 
   // Senha
   senhaAtual: string = '';
@@ -66,7 +68,10 @@ export class ProfileComponent implements OnInit {
   senhaError: string = '';
   senhaSuccess: string = '';
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private userService: UserService
+  ) {
     addIcons({
       arrowBackOutline,
       personOutline,
@@ -83,40 +88,74 @@ export class ProfileComponent implements OnInit {
   }
 
   ngOnInit() {
-    const user = this.authService.getUser();
-    this.userName = user?.name || 'Usuário';
-    this.userEmail = user?.email || '';
-    
-    // Carregar meta salva
-    const savedMeta = localStorage.getItem('user_meta');
-    if (savedMeta) {
-      this.metaMensal = parseFloat(savedMeta);
-    }
+    this.loadUserData();
+  }
 
-    // Carregar foto salva
-    const savedPhoto = localStorage.getItem('user_photo');
-    if (savedPhoto) {
-      this.profilePhoto = savedPhoto;
-    }
+  loadUserData() {
+    this.userService.getMe().subscribe({
+      next: (user) => {
+        this.userName = user.name || 'Usuário';
+        this.userEmail = user.email || '';
+        this.profilePhoto = user.photo || null;
+        this.metaMensal = user.meta || null;
+
+        // Atualiza os dados do usuário no localStorage
+        const currentUser = this.authService.getUser();
+        if (currentUser) {
+          currentUser.name = user.name;
+          currentUser.photo = user.photo;
+          currentUser.meta = user.meta;
+          localStorage.setItem('auth_user', JSON.stringify(currentUser));
+        }
+      },
+      error: (err) => {
+        console.error('Erro ao carregar dados do usuário:', err);
+        // Fallback para dados locais
+        const user = this.authService.getUser();
+        this.userName = user?.name || 'Usuário';
+        this.userEmail = user?.email || '';
+      },
+    });
   }
 
   selectPhoto() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    
+
     input.onchange = (event: any) => {
       const file = event.target.files[0];
       if (file) {
+        // Limitar tamanho (max 2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          alert('A imagem deve ter no máximo 2MB');
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = (e: any) => {
-          this.profilePhoto = e.target.result;
-          localStorage.setItem('user_photo', this.profilePhoto!);
+          const photo = e.target.result;
+          this.profilePhoto = photo;
+
+          // Salvar na API
+          this.userService.updateMe({ photo }).subscribe({
+            next: (user) => {
+              // Atualiza localStorage
+              const currentUser = this.authService.getUser();
+              if (currentUser) {
+                currentUser.photo = photo;
+                localStorage.setItem('auth_user', JSON.stringify(currentUser));
+              }
+            },
+            error: (err) => {
+              console.error('Erro ao salvar foto:', err);
+            },
+          });
         };
         reader.readAsDataURL(file);
       }
     };
-    
+
     input.click();
   }
 
@@ -126,12 +165,29 @@ export class ProfileComponent implements OnInit {
     }
 
     this.isSavingMeta = true;
+    this.metaSuccess = '';
 
-    // Simular salvamento
-    setTimeout(() => {
-      localStorage.setItem('user_meta', this.metaMensal!.toString());
-      this.isSavingMeta = false;
-    }, 800);
+    this.userService.updateMe({ meta: this.metaMensal }).subscribe({
+      next: (user) => {
+        this.isSavingMeta = false;
+        this.metaSuccess = 'Meta salva com sucesso!';
+
+        // Atualiza localStorage
+        const currentUser = this.authService.getUser();
+        if (currentUser) {
+          currentUser.meta = this.metaMensal;
+          localStorage.setItem('auth_user', JSON.stringify(currentUser));
+        }
+
+        setTimeout(() => {
+          this.metaSuccess = '';
+        }, 3000);
+      },
+      error: (err) => {
+        this.isSavingMeta = false;
+        console.error('Erro ao salvar meta:', err);
+      },
+    });
   }
 
   changePassword() {
@@ -155,18 +211,27 @@ export class ProfileComponent implements OnInit {
 
     this.isSavingPassword = true;
 
-    // Simular alteração de senha (integrar com API depois)
-    setTimeout(() => {
-      this.isSavingPassword = false;
-      this.senhaSuccess = 'Senha alterada com sucesso!';
-      this.senhaAtual = '';
-      this.novaSenha = '';
-      this.confirmarSenha = '';
+    this.userService
+      .changePassword({
+        currentPassword: this.senhaAtual,
+        newPassword: this.novaSenha,
+      })
+      .subscribe({
+        next: (response) => {
+          this.isSavingPassword = false;
+          this.senhaSuccess = response.message || 'Senha alterada com sucesso!';
+          this.senhaAtual = '';
+          this.novaSenha = '';
+          this.confirmarSenha = '';
 
-      setTimeout(() => {
-        this.senhaSuccess = '';
-      }, 3000);
-    }, 1000);
+          setTimeout(() => {
+            this.senhaSuccess = '';
+          }, 3000);
+        },
+        error: (err) => {
+          this.isSavingPassword = false;
+          this.senhaError = err.error?.message || 'Erro ao alterar senha';
+        },
+      });
   }
 }
-

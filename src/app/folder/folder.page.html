@@ -7,25 +7,39 @@
     </ion-button>
     <h1>Emprestados</h1>
   </div>
-  <ion-grid>
-    <ion-row>
-      <ion-col size="12" size-md="6">
-        <app-card
-          [firstName]="'Eduardo Brasileiro'"
-          [observation]="'Disse que só vai poder pagar dia 15'"
-          [atrased]="true"
-          [valor]="1500"
-          [dataVencimento]="'2025-12-01'"
-        ></app-card>
-        <app-card
-          [firstName]="'Humberto Constantino'"
-          [atrased]="false"
-          [valor]="800"
-          [dataVencimento]="'2025-12-20'"
-        ></app-card>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+
+  @if (isLoading) {
+    <div class="loading-container">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Carregando empréstimos...</p>
+    </div>
+  } @else if (loans.length === 0) {
+    <div class="empty-container">
+      <p>Nenhum empréstimo ativo encontrado.</p>
+      <ion-button routerLink="/folder/novo-emprestimo">
+        Criar novo empréstimo
+      </ion-button>
+    </div>
+  } @else {
+    <ion-grid>
+      <ion-row>
+        <ion-col size="12" size-md="6">
+          @for (loan of loans; track loan.id) {
+            <app-card
+              [firstName]="loan.nome"
+              [observation]="loan.observacoes"
+              [atrased]="isOverdue(loan)"
+              [valor]="loan.valor"
+              [dataVencimento]="loan.dataVencimento"
+              [emprestimoId]="loan.id"
+              (finalize)="onFinalizeLoan($event)"
+              (update)="onUpdateLoan($event)"
+            ></app-card>
+          }
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  }
 </ion-content>
 } @if(folder === 'novo-emprestimo'){
 <ion-content>

@@ -13,17 +13,23 @@ import {
   ApexTooltip,
   NgApexchartsModule,
 } from 'ng-apexcharts';
-import { IonIcon } from '@ionic/angular/standalone';
+import { IonIcon, IonSpinner } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { walletOutline, trendingUpOutline } from 'ionicons/icons';
+import { LoanService, LoanStats } from '../../services/loan.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-relatorio',
   templateUrl: './relatorio.component.html',
   styleUrls: ['./relatorio.component.scss'],
-  imports: [CommonModule, NgApexchartsModule, IonIcon],
+  imports: [CommonModule, NgApexchartsModule, IonIcon, IonSpinner],
 })
 export class RelatorioComponent implements OnInit {
+  isLoading = true;
+  stats: LoanStats | null = null;
+  userMeta: number = 5000;
+
   // Gauge options
   public gaugeOptions: {
     series: number[];
@@ -35,7 +41,7 @@ export class RelatorioComponent implements OnInit {
   };
 
   // Area chart options
-  public areaSeries: ApexAxisChartSeries;
+  public areaSeries: ApexAxisChartSeries = [];
   public areaChartOptions: ApexChart;
   public areaXAxis: ApexXAxis;
   public areaYAxis: ApexYAxis;
@@ -46,19 +52,79 @@ export class RelatorioComponent implements OnInit {
   public areaGrid: ApexGrid;
   public areaTooltip: ApexTooltip;
 
-  constructor() {
+  constructor(
+    private loanService: LoanService,
+    private userService: UserService
+  ) {
     addIcons({ walletOutline, trendingUpOutline });
 
-    // Valor a receber
-    const valorReceber = 3200;
-    const meta = 5000;
-    const percentual = (valorReceber / meta) * 100;
+    // Inicializa gráficos com valores vazios
+    this.gaugeOptions = this.createGaugeOptions(0, 5000);
+    this.initAreaChart();
+  }
 
-    // --- Configuração do Gauge Moderno ---
-    this.gaugeOptions = {
+  ngOnInit() {
+    this.loadData();
+  }
+
+  loadData() {
+    this.isLoading = true;
+
+    // Carrega a meta do usuário
+    this.userService.getMe().subscribe({
+      next: (user) => {
+        this.userMeta = user.meta || 5000;
+        this.loadStats();
+      },
+      error: () => {
+        this.loadStats();
+      },
+    });
+  }
+
+  loadStats() {
+    this.loanService.getStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+        this.updateCharts();
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Erro ao carregar estatísticas:', err);
+        this.isLoading = false;
+      },
+    });
+  }
+
+  updateCharts() {
+    if (!this.stats) return;
+
+    // Atualiza gauge
+    const valorReceber = this.stats.totalToReceive;
+    this.gaugeOptions = this.createGaugeOptions(valorReceber, this.userMeta);
+
+    // Atualiza gráfico de área
+    if (this.stats.monthlyHistory && this.stats.monthlyHistory.length > 0) {
+      this.areaSeries = [
+        {
+          name: 'Receita',
+          data: this.stats.monthlyHistory.map((h) => h.value),
+        },
+      ];
+      this.areaXAxis = {
+        ...this.areaXAxis,
+        categories: this.stats.monthlyHistory.map((h) => h.month),
+      };
+    }
+  }
+
+  createGaugeOptions(valor: number, meta: number) {
+    const percentual = Math.min((valor / meta) * 100, 100);
+
+    return {
       series: [percentual],
       chart: {
-        type: 'radialBar',
+        type: 'radialBar' as const,
         height: 220,
         sparkline: {
           enabled: true,
@@ -88,23 +154,24 @@ export class RelatorioComponent implements OnInit {
               fontWeight: 700,
               color: '#1a1a2e',
               offsetY: 10,
-              formatter: () => `R$ ${valorReceber.toLocaleString('pt-BR')}`,
+              formatter: () => `R$ ${valor.toLocaleString('pt-BR')}`,
             },
           },
         },
       },
       colors: ['#00c853'],
-      labels: ['Recebido'],
+      labels: ['À Receber'],
       stroke: {
-        lineCap: 'round',
+        lineCap: 'round' as const,
       },
     };
+  }
 
-    // --- Configuração do Gráfico de Área ---
+  initAreaChart() {
     this.areaSeries = [
       {
         name: 'Receita',
-        data: [1900, 2200, 2100, 2500, 2300, 3000],
+        data: [0, 0, 0, 0, 0, 0],
       },
     ];
 
@@ -123,7 +190,7 @@ export class RelatorioComponent implements OnInit {
     };
 
     this.areaXAxis = {
-      categories: ['Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'],
+      categories: ['', '', '', '', '', ''],
       labels: {
         style: {
           colors: '#6c757d',
@@ -192,5 +259,8 @@ export class RelatorioComponent implements OnInit {
     };
   }
 
-  ngOnInit() {}
+  get pendingValue(): number {
+    if (!this.stats) return 0;
+    return Math.max(this.userMeta - this.stats.totalToReceive, 0);
+  }
 }

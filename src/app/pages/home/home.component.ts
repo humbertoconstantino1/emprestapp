@@ -24,6 +24,7 @@ import {
   logOutOutline,
 } from 'ionicons/icons';
 import { AuthService } from '../../services/auth.service';
+import { UserService } from '../../services/user.service';
 
 @Component({
   selector: 'app-home',
@@ -49,7 +50,10 @@ export class HomeComponent implements OnInit {
   userName: string = '';
   profilePhoto: string | null = null;
 
-  constructor(private authService: AuthService) {
+  constructor(
+    private authService: AuthService,
+    private userService: UserService
+  ) {
     addIcons({
       walletOutline,
       addCircleOutline,
@@ -62,14 +66,30 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Primeiro carrega dados locais
     const user = this.authService.getUser();
     this.userName = user?.name || 'Usuário';
-    
-    // Carregar foto do perfil
-    const savedPhoto = localStorage.getItem('user_photo');
-    if (savedPhoto) {
-      this.profilePhoto = savedPhoto;
-    }
+    this.profilePhoto = user?.photo || null;
+
+    // Depois atualiza com dados da API
+    this.userService.getMe().subscribe({
+      next: (userData) => {
+        this.userName = userData.name || 'Usuário';
+        this.profilePhoto = userData.photo || null;
+
+        // Atualiza localStorage
+        const currentUser = this.authService.getUser();
+        if (currentUser) {
+          currentUser.name = userData.name;
+          currentUser.photo = userData.photo;
+          currentUser.meta = userData.meta;
+          localStorage.setItem('auth_user', JSON.stringify(currentUser));
+        }
+      },
+      error: () => {
+        // Mantém dados locais em caso de erro
+      },
+    });
   }
 
   onLogout() {

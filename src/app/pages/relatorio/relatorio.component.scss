@@ -1,3 +1,24 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+
+  ion-spinner {
+    width: 48px;
+    height: 48px;
+    color: #1a1a2e;
+  }
+
+  p {
+    margin-top: 16px;
+    color: #6c757d;
+    font-size: 16px;
+  }
+}
+
 .relatorio-container {
   padding: 16px;
   max-width: 600px;
@@ -99,6 +120,51 @@
 
 .area-chart-wrapper {
   margin: 0 -10px;
+}
+
+.summary-card {
+  .card-header {
+    margin-bottom: 8px;
+  }
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.summary-item {
+  text-align: center;
+  padding: 16px;
+  background: #f5f6fa;
+  border-radius: 12px;
+
+  .summary-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a2e;
+
+    &.success {
+      color: #00c853;
+    }
+
+    &.warning {
+      color: #ff9800;
+    }
+
+    &.danger {
+      color: #e94560;
+    }
+  }
+
+  .summary-label {
+    display: block;
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 4px;
+  }
 }
 
 // Dark mode

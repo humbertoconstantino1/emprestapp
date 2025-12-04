@@ -113,6 +113,18 @@
             </ion-item>
           </div>
 
+          @if (errorMessage) {
+            <div class="error-message">
+              <ion-text color="danger">{{ errorMessage }}</ion-text>
+            </div>
+          }
+
+          @if (successMessage) {
+            <div class="success-message">
+              <ion-text color="success">{{ successMessage }}</ion-text>
+            </div>
+          }
+
           <!-- Botão Enviar -->
           <ion-button
             expand="block"

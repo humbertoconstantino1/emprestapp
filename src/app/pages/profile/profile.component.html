@@ -46,6 +46,12 @@
           <p class="input-hint">Essa meta será usada no gráfico de relatório</p>
         </div>
 
+        @if (metaSuccess) {
+          <div class="success-message">
+            <ion-text color="success">{{ metaSuccess }}</ion-text>
+          </div>
+        }
+
         <ion-button
           expand="block"
           class="save-btn meta"
