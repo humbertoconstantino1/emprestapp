@@ -1,74 +1,108 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { RouterLink, Router } from '@angular/router';
+import {
+  IonContent,
   IonButton,
   IonItem,
   IonTextarea,
-  IonLabel,
   IonInput,
   IonDatetime,
   IonSelect,
   IonSelectOption,
   IonModal,
   IonDatetimeButton,
-} from '@ionic/angular/standalone';
-
-import {
-  IonCardTitle,
-  IonCardSubtitle,
-  IonCardHeader,
-  IonCardContent,
   IonCard,
-  IonGrid,
-  IonRow,
-  IonCol,
+  IonCardContent,
+  IonIcon,
+  IonSpinner,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import {
+  personOutline,
+  callOutline,
+  cashOutline,
+  trendingUpOutline,
+  locationOutline,
+  calendarOutline,
+  documentTextOutline,
+  checkmarkCircleOutline,
+  arrowBackOutline,
+  addCircleOutline,
+} from 'ionicons/icons';
+
 @Component({
   selector: 'app-new-emprestimo',
   templateUrl: './new-emprestimo.component.html',
   styleUrls: ['./new-emprestimo.component.scss'],
+  standalone: true,
   imports: [
+    CommonModule,
+    RouterLink,
+    ReactiveFormsModule,
+    IonContent,
     IonButton,
     IonItem,
     IonTextarea,
-    IonLabel,
     IonInput,
     IonDatetime,
     IonSelect,
     IonSelectOption,
-    ReactiveFormsModule,
     IonModal,
     IonDatetimeButton,
     IonCard,
     IonCardContent,
-    IonCardHeader,
-    IonCardSubtitle,
-    IonCardTitle,
-    IonGrid,
-    IonRow,
-    IonCol,
+    IonIcon,
+    IonSpinner,
   ],
 })
 export class NewEmprestimoComponent implements OnInit {
   clientForm: FormGroup;
-  constructor(private fb: FormBuilder) {
+  isLoading = false;
+
+  constructor(private fb: FormBuilder, private router: Router) {
+    addIcons({
+      personOutline,
+      callOutline,
+      cashOutline,
+      trendingUpOutline,
+      locationOutline,
+      calendarOutline,
+      documentTextOutline,
+      checkmarkCircleOutline,
+      arrowBackOutline,
+      addCircleOutline,
+    });
+
     this.clientForm = this.fb.group({
-      nome: [''],
-      telefone: [''],
-      valor: [null],
-      data: [''],
-      juros: [null],
+      nome: ['', Validators.required],
+      telefone: ['', Validators.required],
+      valor: [null, [Validators.required, Validators.min(1)]],
+      juros: [null, Validators.required],
       endereco: [''],
+      dataVencimento: ['', Validators.required],
       observacoes: [''],
     });
   }
 
+  ngOnInit() {}
+
   submitForm() {
     if (this.clientForm.valid) {
+      this.isLoading = true;
       console.log('Formulário enviado:', this.clientForm.value);
-      // Aqui você pode enviar para API ou salvar localmente
+
+      // Simular envio para API
+      setTimeout(() => {
+        this.isLoading = false;
+        this.router.navigate(['/home']);
+      }, 1500);
     }
   }
-
-  ngOnInit() {}
 }

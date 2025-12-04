@@ -1,16 +1,147 @@
-<ion-card>
+<ion-card class="emprestimo-card" [class.atrasado]="atrased()">
+  <div class="card-status" [class.danger]="atrased()" [class.success]="!atrased()">
+    <ion-icon [name]="atrased() ? 'alert-circle' : 'checkmark-circle'"></ion-icon>
+    <span>{{ atrased() ? 'Atrasado' : 'Em dia' }}</span>
+  </div>
+
   <ion-card-header>
-    <ion-card-title>{{firstName()}}</ion-card-title>
-    @if(atrased() === true){
-      <ion-card-subtitle color="danger">Atrasado</ion-card-subtitle>
-    }@else{
-      <ion-card-subtitle color="success">Em dias</ion-card-subtitle>
-    }
+    <div class="card-avatar">
+      <ion-icon name="person"></ion-icon>
+    </div>
+    <div class="card-info">
+      <ion-card-title>{{ firstName() }}</ion-card-title>
+      <ion-card-subtitle>
+        <ion-icon name="calendar-outline"></ion-icon>
+        Vence: {{ dataVencimento() | date:'dd/MM/yyyy' }}
+      </ion-card-subtitle>
+    </div>
+    <div class="card-value">
+      <span class="value-label">Valor</span>
+      <span class="value-amount">R$ {{ valor() | number:'1.2-2' }}</span>
+    </div>
   </ion-card-header>
+
   <ion-card-content>
-    {{observation()}}
+    @if (observation()) {
+      <div class="observation-box">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <p>{{ observation() }}</p>
+      </div>
+    }
   </ion-card-content>
-  
-  <ion-button fill="clear">Atualizar</ion-button>
-  <ion-button fill="clear">Finalizar empréstimo</ion-button>
+
+  <div class="card-actions">
+    <ion-button fill="clear" class="action-btn update" (click)="openUpdateModal()">
+      <ion-icon name="create-outline" slot="start"></ion-icon>
+      Atualizar
+    </ion-button>
+    <ion-button fill="clear" class="action-btn finish" (click)="onFinalize()">
+      <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+      Finalizar
+    </ion-button>
+  </div>
 </ion-card>
+
+<!-- Modal de Atualização -->
+<ion-modal [isOpen]="isModalOpen" (didDismiss)="closeModal()">
+  <ng-template>
+    <ion-content class="modal-content">
+      <div class="modal-container">
+        <div class="modal-header">
+          <div class="modal-icon">
+            <ion-icon name="create-outline"></ion-icon>
+          </div>
+          <h2>Atualizar Empréstimo</h2>
+          <p>{{ firstName() }}</p>
+        </div>
+
+        <ion-card class="modal-card">
+          <ion-card-content>
+            <form [formGroup]="updateForm" (ngSubmit)="submitUpdate()">
+              <!-- Nova Data de Vencimento -->
+              <div class="input-group">
+                <label class="input-label">Nova data de vencimento</label>
+                <ion-item lines="none" class="input-item date-item">
+                  <ion-icon name="calendar-outline" slot="start"></ion-icon>
+                  <span class="date-text">{{ updateForm.get('novaDataVencimento')?.value | date:'dd/MM/yyyy' }}</span>
+                  <ion-datetime-button datetime="update-datetime"></ion-datetime-button>
+                </ion-item>
+
+                <ion-modal [keepContentsMounted]="true">
+                  <ng-template>
+                    <ion-datetime
+                      id="update-datetime"
+                      formControlName="novaDataVencimento"
+                      presentation="date"
+                      [preferWheel]="true"
+                    ></ion-datetime>
+                  </ng-template>
+                </ion-modal>
+              </div>
+
+              <!-- Comentário / Anotação -->
+              <div class="input-group">
+                <label class="input-label">Comentário ou anotação</label>
+                <ion-item lines="none" class="input-item textarea-item">
+                  <ion-icon name="chatbubble-outline" slot="start"></ion-icon>
+                  <ion-textarea
+                    formControlName="comentario"
+                    placeholder="Adicione um comentário sobre este empréstimo..."
+                    [autoGrow]="true"
+                    rows="4"
+                  ></ion-textarea>
+                </ion-item>
+              </div>
+
+              <!-- Botões -->
+              <div class="modal-actions">
+                <ion-button
+                  expand="block"
+                  fill="outline"
+                  class="cancel-button"
+                  (click)="closeModal()"
+                >
+                  Cancelar
+                </ion-button>
+                <ion-button
+                  expand="block"
+                  type="submit"
+                  class="save-button"
+                >
+                  <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+                  Salvar
+                </ion-button>
+              </div>
+            </form>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
+
+<!-- Modal de Confirmação para Finalizar -->
+<ion-modal [isOpen]="isConfirmModalOpen" (didDismiss)="closeConfirmModal()" class="confirm-modal" [backdropDismiss]="true">
+  <ng-template>
+    <div class="confirm-modal-wrapper" (click)="closeConfirmModal()">
+      <div class="confirm-modal-content" (click)="$event.stopPropagation()">
+        <div class="confirm-icon">
+          <ion-icon name="help-circle-outline"></ion-icon>
+        </div>
+        <h3>Finalizar Empréstimo?</h3>
+        <p>Tem certeza que deseja finalizar o empréstimo de <strong>{{ firstName() }}</strong>?</p>
+        <p class="confirm-value">Valor: <strong>R$ {{ valor() | number:'1.2-2' }}</strong></p>
+        
+        <div class="confirm-actions">
+          <ion-button fill="outline" class="confirm-cancel" (click)="closeConfirmModal()">
+            Cancelar
+          </ion-button>
+          <ion-button class="confirm-finish" (click)="confirmFinalize()">
+            <ion-icon name="checkmark-done-outline" slot="start"></ion-icon>
+            Confirmar
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </ng-template>
+</ion-modal>

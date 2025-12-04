@@ -1,59 +1,139 @@
-<form [formGroup]="clientForm" (ngSubmit)="submitForm()">
-  <!-- Nome -->
-  <ion-item>
-    <ion-label position="floating">Nome</ion-label>
-    <ion-input formControlName="nome" type="text"></ion-input>
-  </ion-item>
+<ion-content class="form-content">
+  <div class="form-container">
+    <div class="form-header">
+      <div class="header-icon">
+        <ion-icon name="add-circle-outline"></ion-icon>
+      </div>
+      <h1>Novo Empréstimo</h1>
+      <p>Preencha os dados do cliente</p>
+    </div>
 
-  <!-- Telefone -->
-  <ion-item>
-    <ion-label position="floating">Telefone</ion-label>
-    <ion-input formControlName="telefone" type="tel"></ion-input>
-  </ion-item>
+    <ion-card class="form-card">
+      <ion-card-content>
+        <form [formGroup]="clientForm" (ngSubmit)="submitForm()">
+          <!-- Nome -->
+          <div class="input-group">
+            <ion-item lines="none" class="input-item">
+              <ion-icon name="person-outline" slot="start"></ion-icon>
+              <ion-input
+                formControlName="nome"
+                type="text"
+                placeholder="Nome do cliente"
+              ></ion-input>
+            </ion-item>
+          </div>
 
-  <!-- Valor do Empréstimo -->
-  <ion-item>
-    <ion-label position="floating">Valor do Empréstimo</ion-label>
-    <ion-input formControlName="valor" type="number"></ion-input>
-  </ion-item>
+          <!-- Telefone -->
+          <div class="input-group">
+            <ion-item lines="none" class="input-item">
+              <ion-icon name="call-outline" slot="start"></ion-icon>
+              <ion-input
+                formControlName="telefone"
+                type="tel"
+                placeholder="Telefone"
+              ></ion-input>
+            </ion-item>
+          </div>
 
-  <!-- Juros -->
-  <ion-item>
-    <ion-label>Juros</ion-label>
-    <ion-select placeholder="Selecione" formControlName="juros">
-      <ion-select-option value="10">10%</ion-select-option>
-      <ion-select-option value="20">20%</ion-select-option>
-      <ion-select-option value="30">30%</ion-select-option>
-    </ion-select>
-  </ion-item>
+          <!-- Valor do Empréstimo -->
+          <div class="input-group">
+            <ion-item lines="none" class="input-item">
+              <ion-icon name="cash-outline" slot="start"></ion-icon>
+              <ion-input
+                formControlName="valor"
+                type="number"
+                placeholder="Valor do empréstimo (R$)"
+              ></ion-input>
+            </ion-item>
+          </div>
 
-  <!-- Endereço -->
-  <ion-item>
-    <ion-label position="floating">Endereço</ion-label>
-    <ion-input formControlName="endereco" type="text"></ion-input>
-  </ion-item>
+          <!-- Juros -->
+          <div class="input-group">
+            <ion-item lines="none" class="input-item">
+              <ion-icon name="trending-up-outline" slot="start"></ion-icon>
+              <ion-select
+                placeholder="Selecione os juros"
+                formControlName="juros"
+                interface="popover"
+              >
+                <ion-select-option value="10">10%</ion-select-option>
+                <ion-select-option value="15">15%</ion-select-option>
+                <ion-select-option value="20">20%</ion-select-option>
+                <ion-select-option value="25">25%</ion-select-option>
+                <ion-select-option value="30">30%</ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
 
-  <!-- Observações -->
-  <ion-item>
-    <ion-label position="floating">Observações</ion-label>
-    <ion-textarea formControlName="observacoes"></ion-textarea>
-  </ion-item>
+          <!-- Endereço -->
+          <div class="input-group">
+            <ion-item lines="none" class="input-item">
+              <ion-icon name="location-outline" slot="start"></ion-icon>
+              <ion-input
+                formControlName="endereco"
+                type="text"
+                placeholder="Endereço"
+              ></ion-input>
+            </ion-item>
+          </div>
 
-  <ion-item lines="none">
-    <!-- Label acima do botão -->
-    <ion-label>Data de vencimento</ion-label>
+          <!-- Data de Vencimento -->
+          <div class="input-group">
+            <ion-item lines="none" class="input-item date-item">
+              <ion-icon name="calendar-outline" slot="start"></ion-icon>
+              <span class="date-label">Data de vencimento</span>
+              <ion-datetime-button
+                datetime="datetime"
+                class="datetime-btn"
+              ></ion-datetime-button>
+            </ion-item>
 
-    <ion-datetime-button datetime="datetime"></ion-datetime-button>
+            <ion-modal [keepContentsMounted]="true">
+              <ng-template>
+                <ion-datetime
+                  id="datetime"
+                  formControlName="dataVencimento"
+                  presentation="date"
+                  [preferWheel]="true"
+                ></ion-datetime>
+              </ng-template>
+            </ion-modal>
+          </div>
 
-    <ion-modal [keepContentsMounted]="true">
-      <ng-template>
-        <ion-datetime id="datetime"></ion-datetime>
-      </ng-template>
-    </ion-modal>
-  </ion-item>
+          <!-- Observações -->
+          <div class="input-group">
+            <ion-item lines="none" class="input-item textarea-item">
+              <ion-icon name="document-text-outline" slot="start"></ion-icon>
+              <ion-textarea
+                formControlName="observacoes"
+                placeholder="Observações (opcional)"
+                [autoGrow]="true"
+                rows="3"
+              ></ion-textarea>
+            </ion-item>
+          </div>
 
-  <!-- Botão Enviar -->
-  <ion-button expand="block" type="submit" [disabled]="clientForm.invalid">
-    Registrar Empréstimo
-  </ion-button>
-</form>
+          <!-- Botão Enviar -->
+          <ion-button
+            expand="block"
+            type="submit"
+            [disabled]="clientForm.invalid || isLoading"
+            class="submit-button"
+          >
+            @if (isLoading) {
+              <ion-spinner name="crescent"></ion-spinner>
+            } @else {
+              <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+              Registrar Empréstimo
+            }
+          </ion-button>
+        </form>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-button fill="clear" class="back-button" routerLink="/home">
+      <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+      Voltar para início
+    </ion-button>
+  </div>
+</ion-content>
