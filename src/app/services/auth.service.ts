@@ -21,7 +21,7 @@ export interface LoginResponse {
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:3000';
+  private readonly API_URL = 'https://api.emprestapp.cloud';
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'auth_user';
 
