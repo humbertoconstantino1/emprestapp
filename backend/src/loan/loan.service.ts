@@ -105,7 +105,11 @@ export class LoanService {
     // Calcula o que foi pago
     if (tipoPagamento === 'juros') {
       // Pagou apenas os juros - renova o empréstimo
-      loan.valorJurosPago = (parseFloat(String(loan.valorJurosPago)) || 0) + valorJuros;
+      // Calcula o valor total dos juros pagos (valor anterior + novo valor)
+      const valorJurosPagoAnterior = parseFloat(String(loan.valorJurosPago)) || 0;
+      const novoValorJurosPago = valorJurosPagoAnterior + valorJuros;
+      
+      loan.valorJurosPago = novoValorJurosPago;
       loan.dataPagamento = new Date().toISOString().split('T')[0];
       // Mantém o empréstimo ativo e renova a data de vencimento
       loan.status = LoanStatus.ACTIVE;
@@ -137,7 +141,7 @@ export class LoanService {
         { id: loan.id },
         { 
           dataVencimento: novaDataVencimento,
-          valorJurosPago: (parseFloat(String(loan.valorJurosPago)) || 0) + valorJuros,
+          valorJurosPago: novoValorJurosPago,
           dataPagamento: new Date().toISOString().split('T')[0],
           status: LoanStatus.ACTIVE
         }
@@ -145,7 +149,6 @@ export class LoanService {
       
       // Atualiza o objeto local também
       loan.dataVencimento = novaDataVencimento;
-      loan.valorJurosPago = (parseFloat(String(loan.valorJurosPago)) || 0) + valorJuros;
       loan.dataPagamento = new Date().toISOString().split('T')[0];
       loan.status = LoanStatus.ACTIVE;
     } else {
