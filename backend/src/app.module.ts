@@ -18,7 +18,7 @@ import { AuthModule } from './auth/auth.module';
       password: process.env.DATABASE_PASSWORD || 'admin',
       database: process.env.DATABASE_NAME || 'loan_db',
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true, // Cria tabelas automaticamente (ajuste para false em produção com migrations)
+      synchronize: false, // Cria tabelas automaticamente (ajuste para false em produção com migrations)
       autoLoadEntities: true,
     }),
     UserModule,

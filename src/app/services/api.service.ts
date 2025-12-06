@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root',
 })
 export class ApiService {
-  private readonly API_URL = 'http://localhost:3000';
+  private readonly API_URL = 'https://api.emprestapp.cloud';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
