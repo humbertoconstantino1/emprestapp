@@ -21,10 +21,51 @@
       </ion-button>
     </div>
   } @else {
-    <ion-grid>
-      <ion-row>
-        <ion-col size="12" size-md="6">
-          @for (loan of loans; track loan.id) {
+    <!-- Filtros -->
+    <div class="filters-container">
+      <ion-item class="filter-item">
+        <ion-icon name="search-outline" slot="start"></ion-icon>
+        <ion-input
+          placeholder="Filtrar por nome"
+          [value]="filterNome"
+          (ionInput)="onFilterNomeChange($event)"
+          clearOnEdit="true"
+        ></ion-input>
+      </ion-item>
+      
+      <ion-item class="filter-item">
+        <ion-icon name="calendar-outline" slot="start"></ion-icon>
+        <ion-label position="stacked">Data de vencimento</ion-label>
+        <ion-input
+          type="date"
+          [value]="filterData"
+          (ionInput)="onFilterDataChange($event)"
+          (ionChange)="onFilterDataChange($event)"
+        ></ion-input>
+      </ion-item>
+      
+      @if (filterNome || filterData) {
+        <ion-button fill="clear" size="small" (click)="clearFilters()" class="clear-filter-btn">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
+          Limpar filtros
+        </ion-button>
+      }
+    </div>
+
+    @if (filteredLoans.length === 0) {
+      <div class="empty-container">
+        <p>Nenhum empréstimo encontrado com os filtros aplicados.</p>
+        @if (filterNome || filterData) {
+          <ion-button fill="outline" (click)="clearFilters()">
+            Limpar filtros
+          </ion-button>
+        }
+      </div>
+    } @else {
+      <ion-grid>
+        <ion-row>
+          <ion-col size="12" size-md="6">
+            @for (loan of filteredLoans; track loan.id) {
             <app-card
               [firstName]="loan.nome"
               [observation]="loan.observacoes || ''"
@@ -38,10 +79,11 @@
               (renew)="onRenewLoan($event)"
               (delete)="onDeleteLoan($event)"
             ></app-card>
-          }
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+            }
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    }
   }
 </ion-content>
 } @if(folder === 'novo-emprestimo'){

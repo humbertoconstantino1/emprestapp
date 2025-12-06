@@ -9,10 +9,13 @@ import {
   IonButton,
   IonIcon,
   IonSpinner,
+  IonItem,
+  IonInput,
+  IonLabel,
   ViewWillEnter,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline } from 'ionicons/icons';
+import { arrowBackOutline, searchOutline, calendarOutline, closeOutline } from 'ionicons/icons';
 import { CardComponent } from '../components/card/card.component';
 import { NewEmprestimoComponent } from '../pages/new-emprestimo/new-emprestimo.component';
 import { RelatorioComponent } from '../pages/relatorio/relatorio.component';
@@ -32,6 +35,9 @@ import { LoanService, Loan } from '../services/loan.service';
     IonButton,
     IonIcon,
     IonSpinner,
+    IonItem,
+    IonInput,
+    IonLabel,
     CardComponent,
     NewEmprestimoComponent,
     RelatorioComponent,
@@ -40,14 +46,17 @@ import { LoanService, Loan } from '../services/loan.service';
 export class FolderPage implements OnInit, ViewWillEnter {
   public folder!: string;
   public loans: Loan[] = [];
+  public filteredLoans: Loan[] = [];
   public isLoading = false;
+  public filterNome: string = '';
+  public filterData: string = '';
   private activatedRoute = inject(ActivatedRoute);
 
   constructor(
     private loanService: LoanService,
     private cdr: ChangeDetectorRef
   ) {
-    addIcons({ arrowBackOutline });
+    addIcons({ arrowBackOutline, searchOutline, calendarOutline, closeOutline });
   }
 
   ngOnInit() {
@@ -73,8 +82,22 @@ export class FolderPage implements OnInit, ViewWillEnter {
     
     this.loanService.getActive().subscribe({
       next: (loans) => {
+        // Ordena os empréstimos por data de vencimento (mais próximos primeiro)
+        const sortedLoans = [...loans].sort((a, b) => {
+          // Empréstimos sem data vão para o final
+          if (!a.dataVencimento && !b.dataVencimento) return 0;
+          if (!a.dataVencimento) return 1;
+          if (!b.dataVencimento) return -1;
+          
+          const dateA = new Date(a.dataVencimento);
+          const dateB = new Date(b.dataVencimento);
+          
+          return dateA.getTime() - dateB.getTime();
+        });
+        
         // Cria um novo array para forçar detecção de mudanças
-        this.loans = [...loans];
+        this.loans = sortedLoans;
+        this.applyFilters();
         this.isLoading = false;
         // Força detecção de mudanças após atualizar os dados
         this.cdr.detectChanges();
@@ -141,6 +164,7 @@ export class FolderPage implements OnInit, ViewWillEnter {
         const index = this.loans.findIndex(l => l.id === updatedLoan.id);
         if (index !== -1) {
           this.loans[index] = { ...updatedLoan };
+          this.applyFilters();
           this.cdr.detectChanges();
         }
         
@@ -162,6 +186,7 @@ export class FolderPage implements OnInit, ViewWillEnter {
       next: () => {
         // Remove o empréstimo da lista local
         this.loans = this.loans.filter(l => l.id !== loanId);
+        this.applyFilters();
         this.cdr.detectChanges();
         // Recarrega a lista para garantir consistência
         this.loadLoans();
@@ -171,5 +196,59 @@ export class FolderPage implements OnInit, ViewWillEnter {
         this.loadLoans();
       },
     });
+  }
+
+  applyFilters() {
+    this.filteredLoans = this.loans.filter(loan => {
+      // Filtro por nome
+      const matchesNome = !this.filterNome || 
+        (loan.nome && loan.nome.toLowerCase().includes(this.filterNome.toLowerCase()));
+      
+      // Filtro por data
+      let matchesData = true;
+      if (this.filterData) {
+        const filterDate = new Date(this.filterData);
+        const loanDate = loan.dataVencimento ? new Date(loan.dataVencimento) : null;
+        
+        if (loanDate) {
+          // Compara apenas dia, mês e ano (ignora hora)
+          matchesData = 
+            filterDate.getFullYear() === loanDate.getFullYear() &&
+            filterDate.getMonth() === loanDate.getMonth() &&
+            filterDate.getDate() === loanDate.getDate();
+        } else {
+          matchesData = false;
+        }
+      }
+      
+      return matchesNome && matchesData;
+    }).sort((a, b) => {
+      // Ordena por data de vencimento (mais próximos primeiro)
+      // Empréstimos sem data vão para o final
+      if (!a.dataVencimento && !b.dataVencimento) return 0;
+      if (!a.dataVencimento) return 1;
+      if (!b.dataVencimento) return -1;
+      
+      const dateA = new Date(a.dataVencimento);
+      const dateB = new Date(b.dataVencimento);
+      
+      return dateA.getTime() - dateB.getTime();
+    });
+  }
+
+  onFilterNomeChange(event: any) {
+    this.filterNome = event.target.value || '';
+    this.applyFilters();
+  }
+
+  onFilterDataChange(event: any) {
+    this.filterData = event.target.value || '';
+    this.applyFilters();
+  }
+
+  clearFilters() {
+    this.filterNome = '';
+    this.filterData = '';
+    this.applyFilters();
   }
 }
